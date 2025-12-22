@@ -58,7 +58,7 @@ In the [envelope-cli
 tool](https://github.com/BlockchainCommons/bc-envelope-cli-rust), the
 process looks like this:
 
-```sh
+```
 PRIVATE_KEYS=$(envelope generate prvkeys)
 PUBLIC_KEYS=$(envelope generate pubkeys "$PRIVATE_KEYS")
 XID_DOC=$(envelope xid new --nickname "MyIdentifier" "$PUBLIC_KEYS")
@@ -74,17 +74,14 @@ document, a [Gordian Envelope](gordian-envelope-basics.md) containing
 structured data about the XID:
 
 ```
+envelope format $XID_DOC
 
-XID(7e1e25d7) [
-   "name": "MyIdentifier"
-   "publicKeys": ur:crypto-pubkeys/hdcxlkadjngh...
-   "domain": "Software Development"
-   "key": [
-      ur:crypto-pubkeys/hdcxaeluhhfy...
-      "Secondary Device Key"
-      "sign"
-   ]
-]
+│ XID(d4563b8a) [
+│     'key': PublicKeys(c014ce8e, SigningPublicKey(d4563b8a, SchnorrPublicKey(9092a60b)), EncapsulationPublicKey(5f8ecda4, X25519PublicKey(5f8ecda4))) [
+│         'allow': 'All'
+│         'nickname': "MyIdentifier"
+│     ]
+│ ]
 ```
 
 The XID document contains:
@@ -97,7 +94,7 @@ The XID document contains:
 
 ## When to Use XIDs for Pseudonymous Identity
 
-XIDs are important for situations where pseudonymity is required. 
+XIDs are important for situations where pseudonymity is required.
 This includes the following use cases:
 
 1. **Privacy is required**: You need to participate without revealing
@@ -110,7 +107,7 @@ contributions come from the same identity.
 control without revealing identity.
 
 In addition, XIDs can support [progressive
-trust](progressive-trust-lifecycle,md):
+trust](progressive-trust-lifecycle.md):
 
 5. **Progressive disclosure is needed**: You want to reveal
 information gradually as trust develops.
