@@ -139,3 +139,5 @@ tmp/
 
 # XID Specific
 ## Add any XID-specific patterns here as they are identified
+
+output/

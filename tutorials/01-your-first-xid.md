@@ -1,6 +1,6 @@
 # Creating Your First XID
 
-This tutorial introduces Amira, a software developer with a politically sensitive background who wants to contribute to social impact projects without risking her professional position or revealing her identity. By the end, you'll have created a basic XID (eXtensible IDentifier) that enables pseudonymous contributions while maintaining security.
+This tutorial introduces Amira, a software developer with a politically sensitive background who wants to contribute to social impact projects without risking her professional position or revealing her identity. By the end, you'll have created a basic XID (eXtensible IDentifier) Document (XIDDoc) that enables pseudonymous contributions while maintaining security.
 
 **Time to complete: 10-15 minutes**
 
@@ -77,18 +77,21 @@ echo "Created your XID: $XID_NAME"
 ```
 
 **What just happened?** This command created your complete, production-ready XID identity:
+
 - **Generated keypairs**: Both private and public keys using modern algorithms
 - **Encrypted private keys**: Protected with your password (like `ssh-keygen -N "passphrase"`)
 - **Added provenance mark**: Genesis timestamp establishing when this identity was created
 - **Signed the document**: Cryptographically signed for authenticity
 
 **Keypairs created:**
+
 - **SigningPrivateKey**: For creating signatures (Ed25519 algorithm)
 - **EncapsulationPrivateKey**: For decryption (X25519 algorithm)
 - **SigningPublicKey**: For signature verification (Ed25519 algorithm)
 - **EncapsulationPublicKey**: For encryption (X25519 algorithm)
 
 **Why Ed25519?**
+
 - **Industry standard**: Same algorithm used by SSH, git, Signal, and modern security tools
 - **Fast and secure**: Proven cryptography with excellent performance
 - **Future-ready**: Later tutorials can export to SSH format for git commit signing
@@ -132,6 +135,7 @@ envelope format "$PRIVATE_XID"
 > **Note**: The digest values shown (like `d1843789`, `7c78855d`) will differ each time you run this because new random keypairs and salts are generated. The structure remains the same.
 
 **What you see:**
+
 - **Curly braces** `{ }`: The XID is wrapped (required for signing)
 - **XID identifier**: `XID(...)` - Amira's unique identifier
 - **Public keys**: `PublicKeys(...)` showing Ed25519PublicKey and X25519PublicKey - Safe to share
@@ -157,6 +161,7 @@ The `ENCRYPTED` markers show sensitive data is protected. The `'hasSecret': Encr
 > This distinction ensures interoperability: tools that understand envelopes will correctly interpret known predicates, while string predicates give you flexibility for custom data. In Tutorial 02, you'll add custom assertions using string predicates to build BRadvoc8's rich persona.
 
 **You now have a production-ready XID!** It includes:
+
 - ✅ Encrypted private keys
 - ✅ Provenance tracking (for document lineage)
 - ✅ Cryptographic signature (proving authenticity)
@@ -187,6 +192,7 @@ XID(...)  ← THE SUBJECT (the main thing)
 - `'provenance': ProvenanceMark(...)` = "this XID **has** this provenance history"
 
 Think of it like natural language:
+
 - **Subject** = "This XID" (the thing we're talking about)
 - **Predicate** = "has key", "has provenance" (the relationship)
 - **Object** = PublicKeys, ProvenanceMark (the value)
@@ -205,6 +211,7 @@ Even the assertions can have their own assertions! Look at the `'key'` assertion
 The public keys object is itself a subject with assertions about it!
 
 **Why this matters for BRadvoc8**:
+
 - You can **add assertions** to your XID (Tutorial 02: GitHub service, SSH keys)
 - You can **remove assertions** via elision (coming up next: removing private keys)
 - You can **nest assertions** to create rich structures (Tutorial 02: complex personas)
@@ -219,6 +226,7 @@ Notice that `envelope format` shows abbreviated labels like `PublicKeys(7c78855d
 **What's contained inside these abbreviations:**
 
 **`PublicKeys(...)`** contains:
+
 - **SigningPublicKey** - Used to verify signatures (Ed25519 in this case)
 - **X25519PublicKey** - Used for encryption key agreement
 
@@ -238,11 +246,13 @@ PublicKeys(7c78855d,
 Note that the identifier of the `SigningPublicKey` matches the XID identifier (`d1843789`), since the XID is derived from the signing public key. This "inception key" can be rotated out later, but the XID identifier remains constant.
 
 **`ENCRYPTED`** contains:
+
 - The actual encrypted PrivateKeys data (ciphertext)
 - Argon2id key derivation parameters
 - Nonce/IV for the encryption
 
 **`Salt`** contains:
+
 - Random bytes (typically 16-32 bytes)
 - Makes each XID's envelope digest unique
 - Prevents correlation by digest matching
@@ -250,6 +260,7 @@ Note that the identifier of the `SigningPublicKey` matches the XID identifier (`
 **Why abbreviate?** To keep things readable. Showing full cryptographic data (hundreds of bytes of base64/hex) would obscure the structure. The abbreviated view lets you focus on the **relationships** between components rather than the raw bytes.
 
 **Keypairs and XID Structure**: Your XID contains both `PrivateKeys` and `PublicKeys` that were generated together as keypairs:
+
 - **SigningPrivateKey** - Used to create signatures (Ed25519 algorithm)
 - **EncapsulationPrivateKey** - Used for decryption (X25519 algorithm)
 - **SigningPublicKey** - Used to verify signatures (Ed25519 algorithm)
@@ -264,6 +275,7 @@ Note that the identifier of the `SigningPublicKey` matches the XID identifier (`
 When you piped keypairs to `envelope xid new`, the CLI embedded your keypairs into the XID structure:
 
 **The Process:**
+
 ```
 Step 1: Your input
   Keypairs (ur:crypto-prvkeys + ur:crypto-pubkeys)
@@ -361,6 +373,7 @@ Public XID digest:   ur:digest/hdcxglfzhhemfsgwhftyeydeoedrplmkgmzswpfncxnnolgsu
 **Critical Observation**: The digests are **exactly the same!** This proves that elision doesn't change the envelope digest.
 
 **What this means**:
+
 - The **envelope digest** (digest we just compared) is identical before and after elision
 - The signature was created over the **full envelope** (with encrypted private key)
 - The signature **verifies on the elided version** (without private key)
@@ -386,20 +399,24 @@ Envelope Root Digest
 **How elision works**:
 
 1. **Each assertion is hashed independently**
+
    - `'key' assertion` → produces digest `abc123...`
    - `'privateKey' assertion` (nested) → produces digest `def456...`
    - etc.
 
 2. **Root hash is calculated FROM these hashes**
+
    - Root = hash(subject_hash + assertion_hash_1 + assertion_hash_2 + ...)
    - The root doesn't hash the content directly, it hashes the hashes!
 
 3. **When you elide, you remove content but KEEP the hash**
+
    - Before eliding: `'privateKey': ENCRYPTED` → hash `def456...` used in parent calculation
    - After eliding: `ELIDED` → **still uses hash `def456...`** in parent calculation
    - The actual encrypted data is gone, but its hash remains
 
 4. **Root hash stays the same because the hash inputs are unchanged**
+
    - Still calculating: hash(subject_hash + hash_1 + hash_2 + hash_3...)
    - The hashes themselves haven't changed, only the content visibility changed
 
@@ -441,6 +458,7 @@ This Merkle tree property enables all the data minimization you'll do in Tutoria
 **Key insights:**
 
 **XID identifier** stays the same even if you:
+
 - Change the nickname
 - Add/remove assertions
 - Elide content
@@ -448,12 +466,14 @@ This Merkle tree property enables all the data minimization you'll do in Tutoria
 - **It's persistent across ALL document versions**
 
 **Envelope digest** behavior:
+
 - ✅ **Changes** when you add new assertions (normal modification)
 - ✅ **Changes** when you remove assertions (normal deletion)
 - ✅ **Changes** when you modify existing content
 - ⚠️ **Preserved** when you use elision (special property!)
 
 **This is the magic of elision:**
+
 - Normal edits (add/remove assertions) → envelope hash changes
 - Elision (remove via `envelope elide`) → envelope hash **preserved**
 - This is why signatures verify on elided versions!
@@ -462,6 +482,7 @@ This Merkle tree property enables all the data minimization you'll do in Tutoria
 > **Key Envelope Property**: Elision removes data while preserving cryptographic integrity. The root hash remains unchanged, so signatures over the complete document verify on elided versions. This enables data minimization while maintaining verifiability.
 
 **Why this is powerful:**
+
 - Sign once (over full data)
 - Create multiple elided versions (removing different sensitive parts)
 - All versions have the same root hash
@@ -529,6 +550,7 @@ provenance validate --format json-pretty "$PROVENANCE_MARK"
 ```
 
 **What just happened?**
+
 - **Signature verified** - Confirms this XID is authentically from BRadvoc8
 - **Provenance verified** - Confirms this is a valid genesis mark (sequence 0, no issues)
 - Both verifications worked from the **public XID** - no secrets required!
@@ -543,6 +565,7 @@ provenance validate --format json-pretty "$PROVENANCE_MARK"
 | **Advance provenance** | ✅ Yes             | Encrypted generator      |
 
 **What the verification proves:**
+
 - `has_genesis: true` - This is the first mark in a provenance chain
 - `sequence: 0` - Genesis mark (version 1 of this XID)
 - `issues: []` - No validation problems detected
@@ -583,6 +606,7 @@ The `'provenance'` section establishes **document genesis** using a cryptographi
 **What is a Provenance Mark?**
 
 Provenance marks are a cryptographically-secured chain system for establishing authenticity. Each mark contains:
+
 - **`key`**: A pseudorandom value that cryptographically proves this mark's link to the previous mark
 - **`hash`**: A commitment to the *next* mark's key (before it's revealed)
 - **`id`**: The chain identifier (same for all marks in the chain)
@@ -594,6 +618,7 @@ This creates a **hash chain** where each mark verifies the previous one and comm
 **Why it's encrypted**: The provenance generator contains the seed needed to generate the *next* mark in the chain. Anyone with this seed could forge future marks, so it's encrypted with your password just like the private keys.
 
 **What this provides for your XID:**
+
 - **Genesis mark**: Establishes when this identity was created (sequence 0)
 - **Chain ID**: Unique identifier linking all future versions of this XID
 - **Unforgeable lineage**: As you update your XID, new marks create an auditable, tamper-evident history
@@ -611,12 +636,14 @@ The `'signed': Signature(Ed25519)` proves cryptographic authenticity. When we us
 4. Attached the signature to the envelope
 
 **The sign-then-elide workflow:**
+
 - Sign the complete document (with encrypted private keys)
 - Elide the private keys for sharing (public version)
 - Signature verifies on BOTH versions (elision preserves the hash!)
 - This is how data minimization with verification works
 
 **Why automatic is better**:
+
 - **Best practice from day 1**: Production XIDs should always be signed
 - **Simpler workflow**: 2 commands to working XID (vs 8 with manual signing)
 - **Proven security model**: Sign-then-elide is the correct pattern
@@ -641,6 +668,7 @@ XID=$(envelope generate keypairs --signing ed25519 | \
 ```
 
 **What you get:**
+
 - ✅ Complete identity document
 - ✅ Encrypted private keys
 - ✅ Provenance tracking
@@ -672,16 +700,19 @@ xid-20251117/
 ```
 
 **File naming conventions:**
+
 - `.envelope` extension = Binary serialized format (for tools)
 - `.format` extension = Human-readable version (for humans)
 
 **Security levels:**
+
 - 🔒 **KEEP SECRET**: `BRadvoc8-xid.envelope` - Contains your encrypted private keys
 - ✅ **SAFE TO SHARE**: `BRadvoc8-xid-public.envelope` - Public keys only (private keys elided)
 
 All files are stored in a timestamp-based directory (e.g., `xid-20251117`) to keep versions organized.
 
 **Your XID is your complete identity - backup it like an SSH key:**
+
 - The `BRadvoc8-xid.envelope` file contains everything: private keys (encrypted), public keys, nickname, provenance, and signature
 - If you lose this file (or your password), you lose your identity (just like losing `id_rsa`)
 
@@ -692,9 +723,11 @@ All files are stored in a timestamp-based directory (e.g., `xid-20251117`) to ke
 Beyond the technical mechanics covered in the previous sections, there are several deeper insights about what this XID enables:
 
 1. **Self-Sovereign Identity**: BRadvoc8's identity is fully under Amira's control with no central authority. No service provider issued this identifier, and she maintains complete ownership of both the keys and the resulting XID document.
+
     > **Why this matters**: Unlike traditional identities (email accounts, social profiles) that can be suspended or controlled by providers, BRadvoc8's XID remains under Amira's control regardless of any third party.
 
 2. **Pseudonymity vs. Anonymity**: This XID implements **pseudonymity** rather than anonymity. The identity "BRadvoc8" can build reputation over time through verifiable contributions, while still protecting Amira's real-world identity.
+
     > **Real-World Analogy**: This is similar to how authors might use pen names (like Mark Twain for Samuel Clemens) - they can build reputation under their pseudonym while keeping their personal identity separate.
 
 3. **Autonomous Storage**: The encrypted XID can be stored anywhere without infrastructure - on a USB drive, in email, printed as a QR code, or cloud storage - because it's a self-contained cryptographic object protected by your password.

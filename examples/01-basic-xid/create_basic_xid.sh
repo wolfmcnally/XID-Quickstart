@@ -16,7 +16,7 @@ XID_NAME="BRadvoc8"
 PASSWORD="Amira's strong password"
 
 # Create output directory
-OUTPUT_DIR="xid-$(date +%Y%m%d%H%M%S)"
+OUTPUT_DIR="output/xid-$(date +%Y%m%d%H%M%S)"
 mkdir -p "$OUTPUT_DIR"
 
 echo "## Step 1: Creating Private XID"

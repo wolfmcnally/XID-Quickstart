@@ -25,11 +25,11 @@ This tutorial continues Amira's story as BRadvoc8. Now that she has a basic XID 
 
 ## Building on Tutorial 01
 
-| Tutorial 01 | Tutorial 02 |
-|-------------|-------------|
+| Tutorial 01                     | Tutorial 02                       |
+|---------------------------------|-----------------------------------|
 | Created basic XID with nickname | Add rich professional information |
-| Generated keypairs | Add SSH signing key for commits |
-| Encrypted private keys | Create public version for sharing |
+| Generated keypairs              | Add SSH signing key for commits   |
+| Encrypted private keys          | Create public version for sharing |
 
 **The Bridge**: Your XID exists and is signed, but it's bare-bones. Now you'll add the professional details that make BRadvoc8 a credible contributor.
 
@@ -75,8 +75,7 @@ First, let's load the XID you created in Tutorial 01 using the password permit w
 
 Find and load your Tutorial 01 artifacts:
 
-👉
-```sh
+```
 # Find the most recent Tutorial 01 output directory
 TUTORIAL_01_DIR=$(find output/xid-2* -type d 2>/dev/null | sort -r | head -1)
 
@@ -92,28 +91,25 @@ XID_NAME=BRadvoc8
 
 echo "Loaded XID from: $TUTORIAL_01_DIR"
 envelope format "$XID"
-```
 
-🔎
-```
-{
-    XID(c7e764b7) [
-        'key': PublicKeys(88d90933) [
-            {
-                'privateKey': ENCRYPTED [
-                    'hasSecret': EncryptedKey(Argon2id)
-                ]
-            } [
-                'salt': Salt
-            ]
-            'allow': 'All'
-            'nickname': "BRadvoc8"
-        ]
-        'provenance': ProvenanceMark(632330b4) [...]
-    ]
-} [
-    'verifiedBy': Signature
-]
+│ {
+│     XID(c7e764b7) [
+│         'key': PublicKeys(88d90933) [
+│             {
+│                 'privateKey': ENCRYPTED [
+│                     'hasSecret': EncryptedKey(Argon2id)
+│                 ]
+│             } [
+│                 'salt': Salt
+│             ]
+│             'allow': 'All'
+│             'nickname': "BRadvoc8"
+│         ]
+│         'provenance': ProvenanceMark(632330b4) [...]
+│     ]
+│ } [
+│     'verifiedBy': Signature
+│ ]
 ```
 
 Your basic XID is loaded. Now let's enrich it with professional information.
@@ -124,16 +120,14 @@ Amira wants to share her GitHub presence - this is key to her **public participa
 
 First, unwrap the XID to access its assertions:
 
-👉
-```sh
+```
 # Unwrap the signed XID to work with its assertions
 UNWRAPPED_XID=$(envelope extract wrapped "$XID")
 ```
 
 Now create GitHub account information with proper data types:
 
-👉
-```sh
+```
 # Create account information envelope with proper types
 GITHUB_ACCOUNT=$(envelope subject type string "$XID_NAME")
 GITHUB_ACCOUNT=$(envelope assertion add pred-obj string "created_at" date "2025-05-10T00:55:11Z" "$GITHUB_ACCOUNT")
@@ -142,15 +136,12 @@ GITHUB_ACCOUNT=$(envelope assertion add pred-obj string "evidence" uri "https://
 
 echo "GitHub account information:"
 envelope format "$GITHUB_ACCOUNT"
-```
 
-🔎
-```
-"BRadvoc8" [
-    "created_at": 2025-05-10T00:55:11Z
-    "evidence": URI(https://api.github.com/users/BRadvoc8)
-    "updated_at": 2025-05-10T00:55:28Z
-]
+│ "BRadvoc8" [
+│     "created_at": 2025-05-10T00:55:11Z
+│     "evidence": URI(https://api.github.com/users/BRadvoc8)
+│     "updated_at": 2025-05-10T00:55:28Z
+│ ]
 ```
 
 Notice how dates appear without quotes (proper date type) and the URL has `URI()` wrapper (proper URI type). This makes the data machine-readable.
@@ -162,8 +153,7 @@ Notice how dates appear without quotes (proper date type) and the URL has `URI()
 
 Now wrap this in a service envelope:
 
-👉
-```sh
+```
 # Create service envelope containing account information
 GITHUB_SERVICE=$(envelope subject type string "GitHub")
 GITHUB_SERVICE=$(envelope assertion add pred-obj known isA string "SourceCodeRepository" "$GITHUB_SERVICE")
@@ -171,26 +161,22 @@ GITHUB_SERVICE=$(envelope assertion add pred-obj string "account" envelope "$GIT
 
 echo "GitHub service:"
 envelope format "$GITHUB_SERVICE"
-```
 
-🔎
-```
-"GitHub" [
-    'isA': "SourceCodeRepository"
-    "account": "BRadvoc8" [
-        "created_at": 2025-05-10T00:55:11Z
-        "evidence": URI(https://api.github.com/users/BRadvoc8)
-        "updated_at": 2025-05-10T00:55:28Z
-    ]
-]
+│ "GitHub" [
+│     'isA': "SourceCodeRepository"
+│     "account": "BRadvoc8" [
+│         "created_at": 2025-05-10T00:55:11Z
+│         "evidence": URI(https://api.github.com/users/BRadvoc8)
+│         "updated_at": 2025-05-10T00:55:28Z
+│     ]
+│ ]
 ```
 
 Note the nested structure: the GitHub service contains account information with a logical hierarchy. The `'isA': "SourceCodeRepository"` uses a known predicate (single quotes) for standardized type indication.
 
 Add the service to your XID:
 
-👉
-```sh
+```
 # Add GitHub service to XID
 UNWRAPPED_XID=$(envelope assertion add pred-obj string "service" envelope "$GITHUB_SERVICE" "$UNWRAPPED_XID")
 
@@ -208,8 +194,7 @@ Now Amira adds an SSH signing key to her XID. This key is crucial for her **publ
 
 Generate an SSH Ed25519 signing key for Git commits:
 
-👉
-```sh
+```
 # Generate SSH Ed25519 signing key
 SSH_PRVKEYS=$(envelope generate prvkeys --signing ssh-ed25519)
 SSH_PUBKEYS=$(envelope generate pubkeys "$SSH_PRVKEYS")
@@ -221,11 +206,10 @@ SSH_EXPORT=$(envelope export "$SSH_PUBKEYS")
 
 echo "Your SSH public key (standard format):"
 echo "$SSH_EXPORT"
-```
 
-You'll see output like:
-```
-ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMx...
+│ ✓ Generated SSH signing keypair
+│ Your SSH public key (standard format):
+│ ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMx...
 ```
 
 This is the standard SSH public key format that GitHub recognizes. You can add this to your GitHub account's SSH signing keys.
@@ -234,8 +218,7 @@ This is the standard SSH public key format that GitHub recognizes. You can add t
 
 Now prove you control this key using a **proof-of-control** pattern:
 
-👉
-```sh
+```
 # Create a proof-of-control statement with today's date
 CURRENT_DATE=$(date -u +"%Y-%m-%d")
 PROOF_STATEMENT=$(envelope subject type string "$XID_NAME controls this SSH key on $CURRENT_DATE")
@@ -245,24 +228,23 @@ PROOF=$(envelope sign --signer "$SSH_PRVKEYS" "$PROOF_STATEMENT")
 
 echo "Proof of SSH key control:"
 envelope format "$PROOF"
-```
 
-🔎
-```
-"BRadvoc8 controls this SSH key on 2025-11-27" [
-    'signed': Signature(SshEd25519)
-]
+│ Proof of SSH key control:
+│ "BRadvoc8 controls this SSH key on 2025-11-27" [
+│     'signed': Signature(SshEd25519)
+│ ]
 ```
 
 The `Signature(SshEd25519)` proves this was signed with an SSH Ed25519 key.
 
 Anyone with the public key can verify:
 
-👉
-```sh
+```
 # Verify the signature
 envelope verify --verifier "$SSH_PUBKEYS" "$PROOF"
 echo "✓ Signature verified - proof of key control confirmed"
+
+│ ✓ Signature verified - proof of key control confirmed
 ```
 
 > **Why This Matters**: This challenge-response pattern proves Amira possesses the private key without revealing it. Anyone can verify the signature, confirming she controls the key that will sign her Git commits.
@@ -271,8 +253,7 @@ echo "✓ Signature verified - proof of key control confirmed"
 
 Add the SSH public key and proof to the XID:
 
-👉
-```sh
+```
 # Add SSH public key to XID
 UNWRAPPED_XID=$(envelope assertion add pred-obj string "sshSigningKey" string "$SSH_EXPORT" "$UNWRAPPED_XID")
 
@@ -300,8 +281,7 @@ Now that you've built a rich persona, you need to re-sign your XID (since adding
 
 When you added assertions in Part I, you modified your XID's content. The original signature from Tutorial 01 no longer applies because it was over the original content. You need to re-sign.
 
-👉
-```sh
+```
 # Use the XID key command to extract and decrypt private keys
 PRVKEYS=$(envelope xid key all --private --password "$PASSWORD" "$XID")
 
@@ -317,31 +297,29 @@ SIGNED_XID=$(envelope sign --signer "$PRVKEYS" "$WRAPPED_XID")
 
 echo "Re-signed XID with new assertions:"
 envelope format "$SIGNED_XID"
-```
 
-🔎
-```
-{
-    XID(c7e764b7) [
-        "service": "GitHub" [...]
-        "sshKeyProof": "BRadvoc8 controls this SSH key on 2025-11-28" [...]
-        "sshSigningKey": "ssh-ed25519 AAAAC3Nza..."
-        'key': PublicKeys(88d90933) [
-            {
-                'privateKey': ENCRYPTED [
-                    'hasSecret': EncryptedKey(Argon2id)
-                ]
-            } [
-                'salt': Salt
-            ]
-            'allow': 'All'
-            'nickname': "BRadvoc8"
-        ]
-        'provenance': ProvenanceMark(632330b4) [...]
-    ]
-} [
-    'signed': Signature(Ed25519)
-]
+│ Re-signed XID with new assertions:
+│ {
+│     XID(c7e764b7) [
+│         "service": "GitHub" [...]
+│         "sshKeyProof": "BRadvoc8 controls this SSH key on 2025-11-28" [...]
+│         "sshSigningKey": "ssh-ed25519 AAAAC3Nza..."
+│         'key': PublicKeys(88d90933) [
+│             {
+│                 'privateKey': ENCRYPTED [
+│                     'hasSecret': EncryptedKey(Argon2id)
+│                 ]
+│             } [
+│                 'salt': Salt
+│             ]
+│             'allow': 'All'
+│             'nickname': "BRadvoc8"
+│         ]
+│         'provenance': ProvenanceMark(632330b4) [...]
+│     ]
+│ } [
+│     'signed': Signature(Ed25519)
+│ ]
 ```
 
 Notice the `{ }` wrapper and `'signed': Signature(Ed25519)` - your enriched XID is now properly signed!
@@ -352,8 +330,7 @@ Notice the `{ }` wrapper and `'signed': Signature(Ed25519)` - your enriched XID 
 
 Now create a public version by eliding (removing) the private key. This is where the Merkle tree magic from Tutorial 01 applies:
 
-👉
-```sh
+```
 # Find the private key assertion digest
 PRIVATE_KEY_ASSERTION=$(envelope assertion find predicate known privateKey "$KEY_OBJECT")
 PRIVATE_KEY_DIGEST=$(envelope digest "$PRIVATE_KEY_ASSERTION")
@@ -370,27 +347,25 @@ PUBLIC_XID=$(envelope elide removing "$PROV_GEN_DIGEST" "$PUBLIC_XID")
 
 echo "Public XID (ready for sharing):"
 envelope format "$PUBLIC_XID"
-```
 
-🔎
-```
-{
-    XID(c7e764b7) [
-        "service": "GitHub" [...]
-        "sshKeyProof": "BRadvoc8 controls this SSH key on 2025-11-28" [...]
-        "sshSigningKey": "ssh-ed25519 AAAAC3Nza..."
-        'key': PublicKeys(88d90933) [
-            'allow': 'All'
-            'nickname': "BRadvoc8"
-            ELIDED
-        ]
-        'provenance': ProvenanceMark(632330b4) [
-            ELIDED
-        ]
-    ]
-} [
-    'signed': Signature(Ed25519)
-]
+│ Public XID (ready for sharing):
+│ {
+│     XID(c7e764b7) [
+│         "service": "GitHub" [...]
+│         "sshKeyProof": "BRadvoc8 controls this SSH key on 2025-11-28" [...]
+│         "sshSigningKey": "ssh-ed25519 AAAAC3Nza..."
+│         'key': PublicKeys(88d90933) [
+│             'allow': 'All'
+│             'nickname': "BRadvoc8"
+│             ELIDED
+│         ]
+│         'provenance': ProvenanceMark(632330b4) [
+│             ELIDED
+│         ]
+│     ]
+│ } [
+│     'signed': Signature(Ed25519)
+│ ]
 ```
 
 The `ELIDED` markers show private data has been removed, but the signature wrapper is still present!
@@ -399,8 +374,7 @@ The `ELIDED` markers show private data has been removed, but the signature wrapp
 
 Let's explicitly verify that elision preserved the root hash (just like in Tutorial 01):
 
-👉
-```sh
+```
 # Compare digests of signed XID vs public (elided) XID
 SIGNED_DIGEST=$(envelope digest "$SIGNED_XID")
 PUBLIC_DIGEST=$(envelope digest "$PUBLIC_XID")
@@ -417,14 +391,11 @@ fi
 # Verify signature on the PUBLIC version (KEY_OBJECT was set in Step 4)
 PUBKEYS=$(envelope extract ur "$KEY_OBJECT")
 envelope verify -v "$PUBKEYS" "$PUBLIC_XID" >/dev/null && echo "✅ Signature verified on public XID!"
-```
 
-🔎
-```
-Signed XID digest: ur:digest/hdcx...
-Public XID digest: ur:digest/hdcx...
-✅ VERIFIED: Digests identical - elision preserved the root hash!
-✅ Signature verified on public XID!
+│ Signed XID digest: ur:digest/hdcx...
+│ Public XID digest: ur:digest/hdcx...
+│ ✅ VERIFIED: Digests identical - elision preserved the root hash!
+│ ✅ Signature verified on public XID!
 ```
 
 **This is the power of Gordian Envelopes**: You signed once (over the complete XID with encrypted private keys), then created a public view by elision. The signature verifies on BOTH versions because elision preserves the Merkle tree root hash.
@@ -439,8 +410,7 @@ You've learned to **elide** (remove) data while preserving the hash. But what if
 
 First, let's create a version with even more elision - hiding the service information:
 
-👉
-```sh
+```
 # Find the service assertion to elide
 SERVICE_ASSERTION=$(envelope assertion find predicate string "service" "$UNWRAPPED_XID")
 SERVICE_DIGEST=$(envelope digest "$SERVICE_ASSERTION")
@@ -450,27 +420,25 @@ EXTRA_ELIDED_XID=$(envelope elide removing "$SERVICE_DIGEST" "$PUBLIC_XID")
 
 echo "Extra-elided XID (service hidden):"
 envelope format "$EXTRA_ELIDED_XID"
-```
 
-🔎
-```
-{
-    XID(c7e764b7) [
-        "sshKeyProof": "BRadvoc8 controls this SSH key on 2025-11-28" [...]
-        "sshSigningKey": "ssh-ed25519 AAAAC3Nza..."
-        'key': PublicKeys(88d90933) [
-            'allow': 'All'
-            'nickname': "BRadvoc8"
-            ELIDED
-        ]
-        'provenance': ProvenanceMark(632330b4) [
-            ELIDED
-        ]
-        ELIDED                    ← Service assertion removed
-    ]
-} [
-    'signed': Signature(Ed25519)
-]
+│ Extra-elided XID (service hidden):
+│ {
+│     XID(c7e764b7) [
+│         "sshKeyProof": "BRadvoc8 controls this SSH key on 2025-11-28" [...]
+│         "sshSigningKey": "ssh-ed25519 AAAAC3Nza..."
+│         'key': PublicKeys(88d90933) [
+│             'allow': 'All'
+│             'nickname': "BRadvoc8"
+│             ELIDED
+│         ]
+│         'provenance': ProvenanceMark(632330b4) [
+│             ELIDED
+│         ]
+│         ELIDED                    ← Service assertion removed
+│     ]
+│ } [
+│     'signed': Signature(Ed25519)
+│ ]
 ```
 
 Notice the `ELIDED` marker where the service assertion was.
@@ -479,21 +447,22 @@ Notice the `ELIDED` marker where the service assertion was.
 
 Create a proof that the service assertion exists in your full XID:
 
-👉
-```sh
+```
 # Create an inclusion proof for the service assertion
 INCLUSION_PROOF=$(envelope proof create "$SERVICE_DIGEST" "$SIGNED_XID")
 
 echo "Created inclusion proof for service assertion"
 echo "Proof digest: $(envelope digest "$INCLUSION_PROOF")"
+
+│ Created inclusion proof for service assertion
+│ Proof digest: ur:digest/hdcx...
 ```
 
 #### Step 7c: Verify the Inclusion Proof
 
 The recipient can verify the elided envelope contains the asserted data:
 
-👉
-```sh
+```
 # Verify the proof confirms the assertion exists in the elided envelope
 if envelope proof confirm "$INCLUSION_PROOF" "$SERVICE_DIGEST" "$EXTRA_ELIDED_XID" 2>/dev/null; then
     echo "✅ Proof confirmed - service assertion is in the original XID"
@@ -508,12 +477,9 @@ ELIDED_DIGEST=$(envelope digest "$EXTRA_ELIDED_XID")
 if [ "$SIGNED_DIGEST" = "$ELIDED_DIGEST" ]; then
     echo "✅ Root hash matches - envelopes are cryptographically equivalent"
 fi
-```
 
-🔎
-```
-✅ Proof confirmed - service assertion is in the original XID
-✅ Root hash matches - envelopes are cryptographically equivalent
+│ ✅ Proof confirmed - service assertion is in the original XID
+│ ✅ Root hash matches - envelopes are cryptographically equivalent
 ```
 
 > **Key Insight**: Inclusion proofs let you prove data exists without revealing everything:
@@ -531,8 +497,7 @@ fi
 
 Save both the private (complete) and public versions:
 
-👉
-```sh
+```
 # Create output directory with timestamp
 OUTPUT_DIR="output/xid-tutorial02-$(date +%Y%m%d%H%M%S)"
 mkdir -p "$OUTPUT_DIR"

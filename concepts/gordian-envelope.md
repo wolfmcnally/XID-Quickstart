@@ -34,6 +34,7 @@ Gordian Envelopes use a structure similar to sentences in natural language:
 ```
 
 For example:
+
 ```
 "BRadvoc8" [
    "name": "BRadvoc8"
