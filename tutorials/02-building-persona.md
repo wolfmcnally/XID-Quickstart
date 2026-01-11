@@ -26,7 +26,7 @@ This tutorial continues Amira's story as BRadvoc8. Now that she has a basic XID 
 ## Building on Tutorial 01
 
 | Tutorial 01                     | Tutorial 02                       |
-|---------------------------------|-----------------------------------|
+| ------------------------------- | --------------------------------- |
 | Created basic XID with nickname | Add rich professional information |
 | Generated keypairs              | Add SSH signing key for commits   |
 | Encrypted private keys          | Create public version for sharing |
@@ -85,16 +85,14 @@ if [ -z "$TUTORIAL_01_DIR" ]; then
 fi
 
 # Load the XID file
-XID=$(cat "$TUTORIAL_01_DIR/BRadvoc8-xid.envelope")
+XID=$(cat "$TUTORIAL_01_DIR/BRadvoc8-private.xid")
 PASSWORD="Amira's strong password"
 XID_NAME=BRadvoc8
-
-echo "Loaded XID from: $TUTORIAL_01_DIR"
 envelope format "$XID"
 
 │ {
-│     XID(c7e764b7) [
-│         'key': PublicKeys(88d90933) [
+│     XID(6103b546) [
+│         'key': PublicKeys(2e94f423, SigningPublicKey(6103b546, Ed25519PublicKey(5d8b7d16)), EncapsulationPublicKey(33cee049, X25519PublicKey(33cee049))) [
 │             {
 │                 'privateKey': ENCRYPTED [
 │                     'hasSecret': EncryptedKey(Argon2id)
@@ -105,10 +103,18 @@ envelope format "$XID"
 │             'allow': 'All'
 │             'nickname': "BRadvoc8"
 │         ]
-│         'provenance': ProvenanceMark(632330b4) [...]
+│         'provenance': ProvenanceMark(80492376) [
+│             {
+│                 'provenanceGenerator': ENCRYPTED [
+│                     'hasSecret': EncryptedKey(Argon2id)
+│                 ]
+│             } [
+│                 'salt': Salt
+│             ]
+│         ]
 │     ]
 │ } [
-│     'verifiedBy': Signature
+│     'signed': Signature(Ed25519)
 │ ]
 ```
 
@@ -118,71 +124,138 @@ Your basic XID is loaded. Now let's enrich it with professional information.
 
 Amira wants to share her GitHub presence - this is key to her **public participation profile**. Her signed Git commits will prove her technical capabilities.
 
-First, unwrap the XID to access its assertions:
+First, she generates the SSH keys she will use to sign commits:
 
 ```
-# Unwrap the signed XID to work with its assertions
-UNWRAPPED_XID=$(envelope extract wrapped "$XID")
+read -r SSH_PRVKEYS SSH_PUBKEYS <<< $(envelope generate keypairs --signing ssh-ed25519)
+SSH_EXPORT=$(envelope export "$SSH_PUBKEYS")
+echo "$SSH_EXPORT"
+
+│ ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILao8HrV7giVkrLLD+08fGUgmhXdE70vAbGxakd2L2n7
 ```
 
-Now create GitHub account information with proper data types:
+Now she signs a dated statement with her private key. This is called a **proof-of-control** pattern:
 
 ```
-# Create account information envelope with proper types
-GITHUB_ACCOUNT=$(envelope subject type string "$XID_NAME")
-GITHUB_ACCOUNT=$(envelope assertion add pred-obj string "created_at" date "2025-05-10T00:55:11Z" "$GITHUB_ACCOUNT")
-GITHUB_ACCOUNT=$(envelope assertion add pred-obj string "updated_at" date "2025-05-10T00:55:28Z" "$GITHUB_ACCOUNT")
-GITHUB_ACCOUNT=$(envelope assertion add pred-obj string "evidence" uri "https://api.github.com/users/$XID_NAME" "$GITHUB_ACCOUNT")
+CURRENT_DATE=$(date -u +"%Y-%m-%d")
+PROOF_STATEMENT=$(envelope subject type string "$XID_NAME controls this SSH key on $CURRENT_DATE")
+PROOF=$(envelope sign --signer "$SSH_PRVKEYS" "$PROOF_STATEMENT")
+envelope format "$PROOF"
 
-echo "GitHub account information:"
-envelope format "$GITHUB_ACCOUNT"
-
-│ "BRadvoc8" [
-│     "created_at": 2025-05-10T00:55:11Z
-│     "evidence": URI(https://api.github.com/users/BRadvoc8)
-│     "updated_at": 2025-05-10T00:55:28Z
+│ "BRadvoc8 controls this SSH key on 2026-01-10" [
+│     'signed': Signature(SshEd25519)
 │ ]
 ```
 
-Notice how dates appear without quotes (proper date type) and the URL has `URI()` wrapper (proper URI type). This makes the data machine-readable.
+First, create GitHub account information with proper data types:
+
+```
+GITHUB_ACCOUNT=$(envelope subject type string "$XID_NAME")
+GITHUB_ACCOUNT=$(envelope assertion add pred-obj known isA string "GitHubAccount" "$GITHUB_ACCOUNT")
+GITHUB_ACCOUNT=$(envelope assertion add pred-obj known dereferenceVia uri "https://api.github.com/users/$XID_NAME" "$GITHUB_ACCOUNT")
+GITHUB_ACCOUNT=$(envelope assertion add pred-obj string "commitKey" ur $SSH_PUBKEYS "$GITHUB_ACCOUNT")
+GITHUB_ACCOUNT=$(envelope assertion add pred-obj string "commitKeyProof" ur $PROOF "$GITHUB_ACCOUNT")
+GITHUB_ACCOUNT=$(envelope assertion add pred-obj string "createdAt" date "2025-05-10T00:55:11Z" "$GITHUB_ACCOUNT")
+GITHUB_ACCOUNT=$(envelope assertion add pred-obj string "updatedAt" date "2025-05-10T00:55:28Z" "$GITHUB_ACCOUNT")
+envelope format "$GITHUB_ACCOUNT"
+
+│ "BRadvoc8" [
+│     'isA': "GitHubAccount"
+│     "commitKey": PublicKeys(2994f390, SigningPublicKey(a0eee379, SSHPublicKey(82fe613c)), EncapsulationPublicKey(901628e4, X25519PublicKey(901628e4)))
+│     "commitKeyProof": {
+│         "BRadvoc8 controls this SSH key on 2026-01-10" [
+│             'signed': Signature(SshEd25519)
+│         ]
+│     }
+│     "createdAt": 2025-05-10T00:55:11Z
+│     "updatedAt": 2025-05-10T00:55:28Z
+│     'dereferenceVia': URI(https://api.github.com/users/BRadvoc8)
+│ ]
+```
+
+Notice:
+
+- Dates appear without quotes (proper date type).
+- The URL has `URI()` wrapper (proper URI type).
+- The `'isA' and 'dereferenceVia'` predicates are known values (single quotes) indicating standardized semantics.
 
 > **Why Proper Types Matter**:
 > - **Date types** enable chronological operations and validation
 > - **URI types** allow systems to recognize and validate web resources
 > - **Structured data** enables machine readability and automated verification
+> - **Known values** provide semantic clarity and interoperability encoded as simple integers
 
-Now wrap this in a service envelope:
+Now add this envelope as an attachment to your XID:
 
 ```
-# Create service envelope containing account information
-GITHUB_SERVICE=$(envelope subject type string "GitHub")
-GITHUB_SERVICE=$(envelope assertion add pred-obj known isA string "SourceCodeRepository" "$GITHUB_SERVICE")
-GITHUB_SERVICE=$(envelope assertion add pred-obj string "account" envelope "$GITHUB_ACCOUNT" "$GITHUB_SERVICE")
+XID_WITH_GITHUB_ATTACHMENT=$(
+    envelope xid attachment add \
+    --vendor "self" \
+    --payload "$GITHUB_ACCOUNT" \
+    --verify inception \
+    --password "$PASSWORD" \
+    --sign inception \
+    --private encrypt \
+    --generator encrypt \
+    --encrypt-password "$PASSWORD" \
+    "$XID" \
+)
+envelope format "$XID_WITH_GITHUB_ATTACHMENT"
 
-echo "GitHub service:"
-envelope format "$GITHUB_SERVICE"
-
-│ "GitHub" [
-│     'isA': "SourceCodeRepository"
-│     "account": "BRadvoc8" [
-│         "created_at": 2025-05-10T00:55:11Z
-│         "evidence": URI(https://api.github.com/users/BRadvoc8)
-│         "updated_at": 2025-05-10T00:55:28Z
+│ {
+│     XID(6103b546) [
+│         'attachment': {
+│             "BRadvoc8" [
+│                 'isA': "GitHubAccount"
+│                 "created_at": 2025-05-10T00:55:11Z
+│                 "updated_at": 2025-05-10T00:55:28Z
+│                 'dereferenceVia': URI(https://api.github.com/users/BRadvoc8)
+│             ]
+│         } [
+│             'vendor': "self"
+│         ]
+│         'key': PublicKeys(2e94f423, SigningPublicKey(6103b546, Ed25519PublicKey(5d8b7d16)), EncapsulationPublicKey(33cee049, X25519PublicKey(33cee049))) [
+│             {
+│                 'privateKey': ENCRYPTED [
+│                     'hasSecret': EncryptedKey(Argon2id)
+│                 ]
+│             } [
+│                 'salt': Salt
+│             ]
+│             'allow': 'All'
+│             'nickname': "BRadvoc8"
+│         ]
+│         'provenance': ProvenanceMark(80492376) [
+│             {
+│                 'provenanceGenerator': ENCRYPTED [
+│                     'hasSecret': EncryptedKey(Argon2id)
+│                 ]
+│             } [
+│                 'salt': Salt
+│             ]
+│         ]
 │     ]
+│ } [
+│     'signed': Signature(Ed25519)
 │ ]
 ```
 
-Note the nested structure: the GitHub service contains account information with a logical hierarchy. The `'isA': "SourceCodeRepository"` uses a known predicate (single quotes) for standardized type indication.
+As you can see, the attachment has been added to the XIDDoc, it has been re-signed, and its private keys and provenance mark generator have been encrypted using the same password.
 
-Add the service to your XID:
+Let's break down each part of the command more closely:
 
-```
-# Add GitHub service to XID
-UNWRAPPED_XID=$(envelope assertion add pred-obj string "service" envelope "$GITHUB_SERVICE" "$UNWRAPPED_XID")
-
-echo "XID with GitHub service added:"
-envelope format "$UNWRAPPED_XID"
-```
+|                                  |                                                                                                                                                            |
+|----------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `envelope xid attachment add`    | Command to add an attachment to a XIDDoc.                                                                                                                  |
+| `--vendor "self"`                | The vendor identifier. Required for attachments. "self" is a common choice when the attachment is created by the XID owner.                                |
+| `--payload "$GITHUB_ACCOUNT"`    | The payload to attach, in this case the GitHub account information.                                                                                        |
+| `--verify inception`             | Verify the existing XID's signature using the inception key before adding the attachment. Ensures you have the correct password and that the XID is valid. |
+| `--password "$PASSWORD"`         | The password to decrypt the existing XID's private keys for signing the new version.                                                                       |
+| `--sign inception`               | Sign the new XIDDoc with the inception key (the original key). Creates a new signature that covers the new content including the attachment.               |
+| `--private encrypt`              | Encrypt the private keys in the new XIDDoc.                                                                                                                |
+| `--generator encrypt`            | Encrypt the provenance mark generator in the new XIDDoc.                                                                                                   |
+| `--encrypt-password "$PASSWORD"` | The password to use for encrypting the new XIDDoc's private keys and provenance generator.                                                                 |
+| `"$XID"`                         | The existing XIDDoc to which the attachment will be added.                                                                                                 |
 
 ### Step 3: Add Your SSH Signing Key
 
@@ -587,11 +660,11 @@ This is what enables selective disclosure: sign once, create multiple views for 
 
 Your XID now has three distinct keys:
 
-| Key | Purpose | Location | Algorithm |
-|-----|---------|----------|-----------|
-| XID Signing | Sign XID updates | `'key'` assertion | Ed25519 |
-| XID Encryption | Decrypt messages | `'key'` assertion | X25519 |
-| SSH Signing | Sign Git commits | `"sshSigningKey"` | SSH-Ed25519 |
+| Key            | Purpose          | Location          | Algorithm   |
+| -------------- | ---------------- | ----------------- | ----------- |
+| XID Signing    | Sign XID updates | `'key'` assertion | Ed25519     |
+| XID Encryption | Decrypt messages | `'key'` assertion | X25519      |
+| SSH Signing    | Sign Git commits | `"sshSigningKey"` | SSH-Ed25519 |
 
 Each key serves one specific purpose. If one is compromised, the others remain secure.
 
