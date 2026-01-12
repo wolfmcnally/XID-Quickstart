@@ -275,7 +275,7 @@ As you can see, the attachment has been added to the XIDDoc, the entire XIDDoc h
 Let's break down each part of the command:
 
 |                                  |                                                                                                                                                            |
-|----------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `envelope xid attachment add`    | Command to add an attachment to a XIDDoc.                                                                                                                  |
 | `--vendor "self"`                | The vendor identifier. Required for attachments. "self" is a common choice when the attachment is created by the XID owner.                                |
 | `--payload "$GITHUB_ACCOUNT"`    | The payload to attach, in this case the GitHub account information.                                                                                        |
@@ -295,7 +295,7 @@ Let's break down each part of the command:
 >
 > **Why separate?** Compromise containment. If your SSH private key is compromised, your XID identity remains safe. Each key serves one specific purpose.
 
-### Step 5: Elide Private Information
+### Step 3: Elide Private Information
 
 Now create a public version by eliding (leaving out) the private key and provenance mar generator. In your private version of the document, they are present but encrypted. In the public version, they are removed entirely, while the signature remains intact and valid.
 
@@ -343,7 +343,7 @@ envelope format "$PUBLIC_XID_WITH_GITHUB_ATTACHMENT"
 
 The `ELIDED` markers show private data has been removed, but the signature is still present and unchanged.
 
-### Step 6: Verify Elision Preserved the Hash
+### Step 4: Verify Elision Preserved the Hash
 
 Let's explicitly verify that elision preserved the root hash (just like in Tutorial 01):
 
@@ -373,81 +373,115 @@ envelope verify --silent -v "$PUBKEYS" "$PUBLIC_XID_WITH_GITHUB_ATTACHMENT" && e
 
 **This is the power of Gordian Envelopes**: You signed once (over the complete XID with encrypted private keys), then created a public view by elision. The signature verifies on BOTH versions because elision preserves the Merkle tree root hash.
 
-### Step 7: Selective Disclosure with Inclusion Proofs
+### Step 5: Selective Disclosure with Inclusion Proofs
 
 You've learned to **elide** (remove) data while preserving the hash. But what if someone needs to verify that specific data exists in your elided XID? This is where **inclusion proofs** come in.
 
 > **The Scenario**: You've shared your public XID with a collaborator. They need to verify you have a GitHub service without seeing all the details. You can prove the assertion exists without revealing everything.
 
-#### Step 7a: Create an Extra-Elided Version
+#### Step 5a: Create an Extra-Elided Version
 
-First, let's create a version with even more elision - hiding the service information:
+First, let's create a version with even more elision - hiding the service information. We start by finding the specific assertion within the envelope that we want to hide (the GitHub account attachment):
 
 ```
-# Find the service assertion to elide
-SERVICE_ASSERTION=$(envelope assertion find predicate string "service" "$UNWRAPPED_XID")
-SERVICE_DIGEST=$(envelope digest "$SERVICE_ASSERTION")
+# Use an Envelope pattern expression to find the envelope to hide (the GitHub account attachment).
+# The pattern expression searches for an assertion with the known value predicate 'attachment' and captures it.
+# If we had more than one attachment, we could refine the pattern to find the specific one we want.
+# We use HEREDOC assignment so we can write a pattern expression using quotes and newlines for clarity.
+PATEX=$(cat <<'EOF'
+    search(
+        assertpred(
+            'attachment'
+        )
+    )
+EOF
+)
+ATTACHMENT_ENVELOPE=$(envelope match --envelopes --last-only $PATEX $PUBLIC_XID_WITH_GITHUB_ATTACHMENT)
+envelope format $ATTACHMENT_ENVELOPE
 
-# Create a version with service elided (in addition to private keys)
-EXTRA_ELIDED_XID=$(envelope elide removing "$SERVICE_DIGEST" "$PUBLIC_XID")
+│ 'attachment': {
+│     "BRadvoc8" [
+│         'isA': "GitHubAccount"
+│         "commitKey": PublicKeys(ec7a21f6, SigningPublicKey(7d5ef1bb, SSHPublicKey(e4c52c06)), EncapsulationPublicKey(52205534, X25519PublicKey(52205534)))
+│         "commitKeyProof": {
+│             "BRadvoc8 controls this SSH key on 2026-01-12" [
+│                 'signed': Signature(SshEd25519)
+│             ]
+│         }
+│         "commitKeyText": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEtNMLHXgqLnxa+m+/NzXeSWrDZIpLLPrQ5Hr7e03squ"
+│         "createdAt": 2025-05-10T00:55:11Z
+│         "updatedAt": 2025-05-10T00:55:28Z
+│         'dereferenceVia': URI(https://api.github.com/users/BRadvoc8)
+│     ]
+│ } [
+│     'vendor': "self"
+│ ]
+```
 
-echo "Extra-elided XID (service hidden):"
-envelope format "$EXTRA_ELIDED_XID"
+We then get the unique digest of that assertion, which allows us to elide it specifically:
 
-│ Extra-elided XID (service hidden):
+```
+ATTACHMENT_DIGEST=$(envelope digest "$ATTACHMENT_ENVELOPE")
+```
+
+Finally we create a new version of the XID with that specific assertion elided:
+
+```
+EXTRA_ELIDED_XIDDOC=$(envelope elide removing "$ATTACHMENT_DIGEST" "$PUBLIC_XID_WITH_GITHUB_ATTACHMENT")
+envelope format "$EXTRA_ELIDED_XIDDOC"
+
 │ {
-│     XID(c7e764b7) [
-│         "sshKeyProof": "BRadvoc8 controls this SSH key on 2025-11-28" [...]
-│         "sshSigningKey": "ssh-ed25519 AAAAC3Nza..."
-│         'key': PublicKeys(88d90933) [
+│     XID(6103b546) [
+│         'key': PublicKeys(2e94f423, SigningPublicKey(6103b546, Ed25519PublicKey(5d8b7d16)), EncapsulationPublicKey(33cee049, X25519PublicKey(33cee049))) [
 │             'allow': 'All'
 │             'nickname': "BRadvoc8"
 │             ELIDED
 │         ]
-│         'provenance': ProvenanceMark(632330b4) [
+│         'provenance': ProvenanceMark(80492376) [
 │             ELIDED
 │         ]
-│         ELIDED                    ← Service assertion removed
+│         ELIDED
 │     ]
 │ } [
 │     'signed': Signature(Ed25519)
 │ ]
 ```
 
-Notice the `ELIDED` marker where the service assertion was.
+Notice that the only assertions in the public XID document are now the public key, the provenance mark, and an `ELIDED` marker representing where the attachment assertion was.
 
-#### Step 7b: Create an Inclusion Proof
+#### Step 5b: Create an Inclusion Proof
 
 Create a proof that the service assertion exists in your full XID:
 
 ```
 # Create an inclusion proof for the service assertion
-INCLUSION_PROOF=$(envelope proof create "$SERVICE_DIGEST" "$SIGNED_XID")
+INCLUSION_PROOF=$(envelope proof create "$ATTACHMENT_DIGEST" "$PUBLIC_XID_WITH_GITHUB_ATTACHMENT")
 
-echo "Created inclusion proof for service assertion"
-echo "Proof digest: $(envelope digest "$INCLUSION_PROOF")"
+# The digest of the proof is the same as the digest of the elided envelope, confirming they are cryptographically linked
+envelope digest $INCLUSION_PROOF
+envelope digest $EXTRA_ELIDED_XIDDOC
 
-│ Created inclusion proof for service assertion
-│ Proof digest: ur:digest/hdcx...
+│ ur:digest/hdcxgsfphhmentmolkzcptislkvttsftgykbchrpendwrdfybyykkkesgyhnmwmyhlhnjldmmtdt
+│ ur:digest/hdcxgsfphhmentmolkzcptislkvttsftgykbchrpendwrdfybyykkkesgyhnmwmyhlhnjldmmtdt
 ```
 
-#### Step 7c: Verify the Inclusion Proof
+#### Step 5c: Verify the Inclusion Proof
 
 The recipient can verify the elided envelope contains the asserted data:
 
 ```
 # Verify the proof confirms the assertion exists in the elided envelope
-if envelope proof confirm "$INCLUSION_PROOF" "$SERVICE_DIGEST" "$EXTRA_ELIDED_XID" 2>/dev/null; then
+if envelope proof confirm --silent $INCLUSION_PROOF $ATTACHMENT_DIGEST $EXTRA_ELIDED_XIDDOC; then
     echo "✅ Proof confirmed - service assertion is in the original XID"
 else
     echo "⚠ Proof failed"
 fi
 
 # Also verify both envelopes have the same root hash
-SIGNED_DIGEST=$(envelope digest "$SIGNED_XID")
-ELIDED_DIGEST=$(envelope digest "$EXTRA_ELIDED_XID")
+ORIGINAL_DIGEST=$(envelope digest "$PUBLIC_XID_WITH_GITHUB_ATTACHMENT")
+ELIDED_DIGEST=$(envelope digest "$EXTRA_ELIDED_XIDDOC")
 
-if [ "$SIGNED_DIGEST" = "$ELIDED_DIGEST" ]; then
+if [ "$ORIGINAL_DIGEST" = "$ELIDED_DIGEST" ]; then
     echo "✅ Root hash matches - envelopes are cryptographically equivalent"
 fi
 
@@ -466,7 +500,7 @@ fi
 - All versions cryptographically prove they came from the same original
 - Perfect for progressive trust: start minimal, prove more as trust grows
 
-### Step 8: Save Your Files
+### Step 6: Save Your Files
 
 Save both the private (complete) and public versions:
 
@@ -475,16 +509,16 @@ Save both the private (complete) and public versions:
 OUTPUT_DIR="output/xid-tutorial02-$(date +%Y%m%d%H%M%S)"
 mkdir -p "$OUTPUT_DIR"
 
-# Save signed XID (complete version with encrypted keys)
-echo "$SIGNED_XID" > "$OUTPUT_DIR/$XID_NAME-xid.envelope"
-envelope format "$SIGNED_XID" > "$OUTPUT_DIR/$XID_NAME-xid.format"
+# Save XIDDoc with attachment (complete version with encrypted keys)
+echo "$XID_WITH_GITHUB_ATTACHMENT" > "$OUTPUT_DIR/$XID_NAME-private.xid"
+envelope format "$XID_WITH_GITHUB_ATTACHMENT" > "$OUTPUT_DIR/$XID_NAME-private.format"
 
 # Save public XID (elided version)
-echo "$PUBLIC_XID" > "$OUTPUT_DIR/$XID_NAME-public.envelope"
-envelope format "$PUBLIC_XID" > "$OUTPUT_DIR/$XID_NAME-public.format"
+echo "$PUBLIC_XID_WITH_GITHUB_ATTACHMENT" > "$OUTPUT_DIR/$XID_NAME-public.xid"
+envelope format "$PUBLIC_XID_WITH_GITHUB_ATTACHMENT" > "$OUTPUT_DIR/$XID_NAME-public.format"
 
 # Save SSH private keys (for git configuration - keep secure!)
-echo "$SSH_PRVKEYS" > "$OUTPUT_DIR/$XID_NAME-ssh-prvkeys.envelope"
+echo "$SSH_PRVKEYS" > "$OUTPUT_DIR/$XID_NAME-ssh-prvkeys.ur"
 
 # Save SSH public key (standard format for GitHub)
 echo "$SSH_EXPORT" > "$OUTPUT_DIR/$XID_NAME-ssh.pub"
@@ -497,12 +531,12 @@ Your Tutorial 02 output directory contains:
 
 ```
 output/xid-tutorial02-TIMESTAMP/
-├── BRadvoc8-xid.envelope         # 🔒 Signed XID (complete, keep secure)
-├── BRadvoc8-xid.format           #    Human-readable version
-├── BRadvoc8-public.envelope      # ✅ Public XID (safe to share)
-├── BRadvoc8-public.format        #    Human-readable version
-├── BRadvoc8-ssh-prvkeys.envelope # 🔒 SSH private keys (keep secure!)
-└── BRadvoc8-ssh.pub              # ✅ SSH public key (for GitHub)
+├── BRadvoc8-private.xid        # 🔒 Signed XID (complete, keep secure)
+├── BRadvoc8-private.format     #    Human-readable version
+├── BRadvoc8-public.xid         # ✅ Public XID (safe to share)
+├── BRadvoc8-public.format      #    Human-readable version
+├── BRadvoc8-ssh-prvkeys.ur     # 🔒 SSH private keys (keep secure!)
+└── BRadvoc8-ssh.pub            # ✅ SSH public key (for GitHub)
 ```
 
 ---
@@ -518,9 +552,9 @@ You've transformed a bare-bones XID into a rich professional persona with proper
 You added GitHub account information using:
 - **Date types**: `2025-05-10T00:55:11Z` (machine-parseable timestamps)
 - **URI types**: `URI(https://api.github.com/users/BRadvoc8)` (validated web resources)
-- **Nested envelopes**: Service → Account → Properties (logical hierarchy)
+- **Nested envelopes**: Attachment → Account → Properties (logical hierarchy)
 
-**Why nested structures matter**: When Ben fetches your XID in Tutorial 03, he can navigate to `service` → `GitHub` → `account` → `evidence` to find the API endpoint that proves your GitHub presence. Structured data enables automated verification.
+**Why nested structures matter**: When Ben fetches your XID in Tutorial 03, he can navigate to `attachment` → `GitHub` → `account` → `evidence` to find the API endpoint that proves your GitHub presence. Structured data enables automated verification.
 
 **2. SSH Signing Key for Git Commits**
 
@@ -534,14 +568,14 @@ You generated an SSH Ed25519 key that:
 You proved you control the SSH key by:
 - Creating a dated statement ("BRadvoc8 controls this SSH key on 2025-11-28")
 - Signing it with the SSH private key
-- Including the signed proof in your XID
+- Including the signed proof in your XIDDoc
 
-Anyone can verify this proof without you revealing the private key. The dated statement prevents replay attacks - you can't claim you had the key before that date.
+Anyone can verify this proof without you revealing the private key. This establishes trust that the SSH key is legitimately associated with your identity.
 
 **4. Re-Signing After Modification**
 
 When you added assertions to your XID, you:
-- Modified the envelope content (adding service, SSH key, proof)
+- Modified the envelope content (adding attachment, SSH key, proof)
 - Invalidated the original Tutorial 01 signature
 - Re-signed with your XID's private keys (decrypted with password)
 
