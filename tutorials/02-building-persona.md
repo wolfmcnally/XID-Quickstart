@@ -78,12 +78,10 @@ Find and load your Tutorial 01 artifacts:
 ```
 # Find the most recent Tutorial 01 output directory
 TUTORIAL_01_DIR=$(find output/xid-2* -type d 2>/dev/null | sort -r | head -1)
-
 if [ -z "$TUTORIAL_01_DIR" ]; then
     echo "No Tutorial 01 output found. Run tests/01-your-first-xid-TEST.sh first."
     exit 1
 fi
-
 # Load the XID file
 XID=$(cat "$TUTORIAL_01_DIR/BRadvoc8-private.xid")
 PASSWORD="Amira's strong password"
@@ -136,7 +134,7 @@ She adds her SSH public key to her GitHub account's SSH signing keys. To do that
 SSH_EXPORT=$(envelope export "$SSH_PUBKEYS")
 echo "$SSH_EXPORT"
 
-│ ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILao8HrV7giVkrLLD+08fGUgmhXdE70vAbGxakd2L2n7
+│ ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHXFsZIZWX4Hnfopn/ZTwhx8THWhYxamq7mTGLRW5jsX
 ```
 
 > **Why SSH Signing Keys Matter**: For pseudonymous contributors like Amira, signed Git commits ARE their reputation. Each commit signed with her SSH key proves it came from BRadvoc8, building verifiable evidence of technical capabilities over time.
@@ -149,7 +147,7 @@ PROOF_STATEMENT=$(envelope subject type string "$XID_NAME controls this SSH key 
 PROOF=$(envelope sign --signer "$SSH_PRVKEYS" "$PROOF_STATEMENT")
 envelope format "$PROOF"
 
-│ "BRadvoc8 controls this SSH key on 2026-01-10" [
+│ "BRadvoc8 controls this SSH key on 2026-01-12" [
 │     'signed': Signature(SshEd25519)
 │ ]
 ```
@@ -183,13 +181,13 @@ envelope format "$GITHUB_ACCOUNT"
 
 │ "BRadvoc8" [
 │     'isA': "GitHubAccount"
-│     "commitKey": PublicKeys(ec7a21f6, SigningPublicKey(7d5ef1bb, SSHPublicKey(e4c52c06)), EncapsulationPublicKey(52205534, X25519PublicKey(52205534)))
+│     "commitKey": PublicKeys(9839828c, SigningPublicKey(69d10561, SSHPublicKey(ac00a520)), EncapsulationPublicKey(02d6f5a1, X25519PublicKey(02d6f5a1)))
 │     "commitKeyProof": {
 │         "BRadvoc8 controls this SSH key on 2026-01-12" [
 │             'signed': Signature(SshEd25519)
 │         ]
 │     }
-│     "commitKeyText": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEtNMLHXgqLnxa+m+/NzXeSWrDZIpLLPrQ5Hr7e03squ"
+│     "commitKeyText": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHXFsZIZWX4Hnfopn/ZTwhx8THWhYxamq7mTGLRW5jsX"
 │     "createdAt": 2025-05-10T00:55:11Z
 │     "updatedAt": 2025-05-10T00:55:28Z
 │     'dereferenceVia': URI(https://api.github.com/users/BRadvoc8)
@@ -230,13 +228,13 @@ envelope format "$XID_WITH_GITHUB_ATTACHMENT"
 │         'attachment': {
 │             "BRadvoc8" [
 │                 'isA': "GitHubAccount"
-│                 "commitKey": PublicKeys(ec7a21f6, SigningPublicKey(7d5ef1bb, SSHPublicKey(e4c52c06)), EncapsulationPublicKey(52205534, X25519PublicKey(52205534)))
+│                 "commitKey": PublicKeys(9839828c, SigningPublicKey(69d10561, SSHPublicKey(ac00a520)), EncapsulationPublicKey(02d6f5a1, X25519PublicKey(02d6f5a1)))
 │                 "commitKeyProof": {
 │                     "BRadvoc8 controls this SSH key on 2026-01-12" [
 │                         'signed': Signature(SshEd25519)
 │                     ]
 │                 }
-│                 "commitKeyText": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEtNMLHXgqLnxa+m+/NzXeSWrDZIpLLPrQ5Hr7e03squ"
+│                 "commitKeyText": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHXFsZIZWX4Hnfopn/ZTwhx8THWhYxamq7mTGLRW5jsX"
 │                 "createdAt": 2025-05-10T00:55:11Z
 │                 "updatedAt": 2025-05-10T00:55:28Z
 │                 'dereferenceVia': URI(https://api.github.com/users/BRadvoc8)
@@ -313,13 +311,13 @@ envelope format "$PUBLIC_XID_WITH_GITHUB_ATTACHMENT"
 │         'attachment': {
 │             "BRadvoc8" [
 │                 'isA': "GitHubAccount"
-│                 "commitKey": PublicKeys(ec7a21f6, SigningPublicKey(7d5ef1bb, SSHPublicKey(e4c52c06)), EncapsulationPublicKey(52205534, X25519PublicKey(52205534)))
+│                 "commitKey": PublicKeys(9839828c, SigningPublicKey(69d10561, SSHPublicKey(ac00a520)), EncapsulationPublicKey(02d6f5a1, X25519PublicKey(02d6f5a1)))
 │                 "commitKeyProof": {
 │                     "BRadvoc8 controls this SSH key on 2026-01-12" [
 │                         'signed': Signature(SshEd25519)
 │                     ]
 │                 }
-│                 "commitKeyText": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEtNMLHXgqLnxa+m+/NzXeSWrDZIpLLPrQ5Hr7e03squ"
+│                 "commitKeyText": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHXFsZIZWX4Hnfopn/ZTwhx8THWhYxamq7mTGLRW5jsX"
 │                 "createdAt": 2025-05-10T00:55:11Z
 │                 "updatedAt": 2025-05-10T00:55:28Z
 │                 'dereferenceVia': URI(https://api.github.com/users/BRadvoc8)
@@ -363,10 +361,10 @@ fi
 
 # Verify signature on the PUBLIC version (KEY_OBJECT was set in Step 4)
 PUBKEYS=$(envelope xid key at 0 "$PUBLIC_XID_WITH_GITHUB_ATTACHMENT")
-envelope verify --silent -v "$PUBKEYS" "$PUBLIC_XID_WITH_GITHUB_ATTACHMENT" && echo "✅ Signature verified on public XID!"
+envelope verify --silent -v "$PUBKEYS" "$PUBLIC_XID_WITH_GITHUB_ATTACHMENT" && echo '✅ Signature verified on public XID!'
 
-│ Signed XID digest: ur:digest/hdcxgsfphhmentmolkzcptislkvttsftgykbchrpendwrdfybyykkkesgyhnmwmyhlhnjldmmtdt
-│ Public XID digest: ur:digest/hdcxgsfphhmentmolkzcptislkvttsftgykbchrpendwrdfybyykkkesgyhnmwmyhlhnjldmmtdt
+│ Signed XID digest: ur:digest/hdcxswfrplwltibatbinvygegmnnhtflfmztndlkdrtnzspsnlbywewstngdnsurjyfhjnfzdtfy
+│ Public XID digest: ur:digest/hdcxswfrplwltibatbinvygegmnnhtflfmztndlkdrtnzspsnlbywewstngdnsurjyfhjnfzdtfy
 │ ✅ VERIFIED: Digests identical - elision preserved the root hash!
 │ ✅ Signature verified on public XID!
 ```
@@ -381,12 +379,9 @@ You've learned to **elide** (remove) data while preserving the hash. But what if
 
 #### Step 5a: Create an Extra-Elided Version
 
-First, let's create a version with even more elision - hiding the service information. We start by finding the specific assertion within the envelope that we want to hide (the GitHub account attachment):
+First, let's create a version with even more elision - hiding the service information. We start by finding the specific assertion within the envelope that we want to hide (the GitHub account attachment). To do that, we use an Envelope pattern expression (a topic for a different tutorial) to search for the assertion with the known predicate 'attachment' and capture it. This allows us to get the unique digest of that assertion, which we can then use to elide it specifically in the next step.
 
 ```
-# Use an Envelope pattern expression to find the envelope to hide (the GitHub account attachment).
-# The pattern expression searches for an assertion with the known value predicate 'attachment' and captures it.
-# If we had more than one attachment, we could refine the pattern to find the specific one we want.
 # We use HEREDOC assignment so we can write a pattern expression using quotes and newlines for clarity.
 PATEX=$(cat <<'EOF'
     search(
@@ -402,13 +397,13 @@ envelope format $ATTACHMENT_ENVELOPE
 │ 'attachment': {
 │     "BRadvoc8" [
 │         'isA': "GitHubAccount"
-│         "commitKey": PublicKeys(ec7a21f6, SigningPublicKey(7d5ef1bb, SSHPublicKey(e4c52c06)), EncapsulationPublicKey(52205534, X25519PublicKey(52205534)))
+│         "commitKey": PublicKeys(9839828c, SigningPublicKey(69d10561, SSHPublicKey(ac00a520)), EncapsulationPublicKey(02d6f5a1, X25519PublicKey(02d6f5a1)))
 │         "commitKeyProof": {
 │             "BRadvoc8 controls this SSH key on 2026-01-12" [
 │                 'signed': Signature(SshEd25519)
 │             ]
 │         }
-│         "commitKeyText": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEtNMLHXgqLnxa+m+/NzXeSWrDZIpLLPrQ5Hr7e03squ"
+│         "commitKeyText": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHXFsZIZWX4Hnfopn/ZTwhx8THWhYxamq7mTGLRW5jsX"
 │         "createdAt": 2025-05-10T00:55:11Z
 │         "updatedAt": 2025-05-10T00:55:28Z
 │         'dereferenceVia': URI(https://api.github.com/users/BRadvoc8)
@@ -461,8 +456,8 @@ INCLUSION_PROOF=$(envelope proof create "$ATTACHMENT_DIGEST" "$PUBLIC_XID_WITH_G
 envelope digest $INCLUSION_PROOF
 envelope digest $EXTRA_ELIDED_XIDDOC
 
-│ ur:digest/hdcxgsfphhmentmolkzcptislkvttsftgykbchrpendwrdfybyykkkesgyhnmwmyhlhnjldmmtdt
-│ ur:digest/hdcxgsfphhmentmolkzcptislkvttsftgykbchrpendwrdfybyykkkesgyhnmwmyhlhnjldmmtdt
+│ ur:digest/hdcxswfrplwltibatbinvygegmnnhtflfmztndlkdrtnzspsnlbywewstngdnsurjyfhjnfzdtfy
+│ ur:digest/hdcxswfrplwltibatbinvygegmnnhtflfmztndlkdrtnzspsnlbywewstngdnsurjyfhjnfzdtfy
 ```
 
 #### Step 5c: Verify the Inclusion Proof
@@ -525,6 +520,17 @@ echo "$SSH_EXPORT" > "$OUTPUT_DIR/$XID_NAME-ssh.pub"
 
 echo "Saved files to $OUTPUT_DIR:"
 ls -la "$OUTPUT_DIR"
+
+│ Saved files to output/xid-tutorial02-20260112002916:
+│ total 48
+│ drwxr-xr-x  8 wolf  staff   256 Jan 12 00:29 .
+│ drwxr-xr-x  5 wolf  staff   160 Jan 12 00:29 ..
+│ -rw-r--r--  1 wolf  staff  1550 Jan 12 00:29 BRadvoc8-private.format
+│ -rw-r--r--  1 wolf  staff  3642 Jan 12 00:29 BRadvoc8-private.xid
+│ -rw-r--r--  1 wolf  staff  1201 Jan 12 00:29 BRadvoc8-public.format
+│ -rw-r--r--  1 wolf  staff  2366 Jan 12 00:29 BRadvoc8-public.xid
+│ -rw-r--r--  1 wolf  staff   895 Jan 12 00:29 BRadvoc8-ssh-prvkeys.ur
+│ -rw-r--r--  1 wolf  staff    81 Jan 12 00:29 BRadvoc8-ssh.pub
 ```
 
 Your Tutorial 02 output directory contains:
