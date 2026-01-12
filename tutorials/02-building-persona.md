@@ -128,11 +128,18 @@ First, she generates the SSH keys she will use to sign commits:
 
 ```
 read -r SSH_PRVKEYS SSH_PUBKEYS <<< $(envelope generate keypairs --signing ssh-ed25519)
+```
+
+She adds her SSH public key to her GitHub account's SSH signing keys. To do that, she needs to export the public key in the standard SSH format that GitHub recognizes:
+
+```
 SSH_EXPORT=$(envelope export "$SSH_PUBKEYS")
 echo "$SSH_EXPORT"
 
 │ ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILao8HrV7giVkrLLD+08fGUgmhXdE70vAbGxakd2L2n7
 ```
+
+> **Why SSH Signing Keys Matter**: For pseudonymous contributors like Amira, signed Git commits ARE their reputation. Each commit signed with her SSH key proves it came from BRadvoc8, building verifiable evidence of technical capabilities over time.
 
 Now she signs a dated statement with her private key. This is called a **proof-of-control** pattern:
 
@@ -147,13 +154,28 @@ envelope format "$PROOF"
 │ ]
 ```
 
-First, create GitHub account information with proper data types:
+The `Signature(SshEd25519)` proves this was signed with an SSH Ed25519 key.
+
+Anyone with the public key can verify:
+
+```
+# Verify the signature
+envelope verify --silent --verifier "$SSH_PUBKEYS" "$PROOF"
+echo "✓ Signature verified - proof of key control confirmed"
+
+│ ✓ Signature verified - proof of key control confirmed
+```
+
+> **Why This Matters**: This self-signed attestation pattern proves Amira possesses the private key without revealing it. Anyone can verify the signature, confirming she controls the key that will sign her Git commits. An even stronger pattern would be *challenge-response* where the verifier issues a random challenge that the prover must sign, but that requires direct interaction. This dated statement is a simpler alternative that still proves control.
+
+Next, she assembles her GitHub account information with proper data types:
 
 ```
 GITHUB_ACCOUNT=$(envelope subject type string "$XID_NAME")
 GITHUB_ACCOUNT=$(envelope assertion add pred-obj known isA string "GitHubAccount" "$GITHUB_ACCOUNT")
 GITHUB_ACCOUNT=$(envelope assertion add pred-obj known dereferenceVia uri "https://api.github.com/users/$XID_NAME" "$GITHUB_ACCOUNT")
 GITHUB_ACCOUNT=$(envelope assertion add pred-obj string "commitKey" ur $SSH_PUBKEYS "$GITHUB_ACCOUNT")
+GITHUB_ACCOUNT=$(envelope assertion add pred-obj string "commitKeyText" string $SSH_EXPORT "$GITHUB_ACCOUNT")
 GITHUB_ACCOUNT=$(envelope assertion add pred-obj string "commitKeyProof" ur $PROOF "$GITHUB_ACCOUNT")
 GITHUB_ACCOUNT=$(envelope assertion add pred-obj string "createdAt" date "2025-05-10T00:55:11Z" "$GITHUB_ACCOUNT")
 GITHUB_ACCOUNT=$(envelope assertion add pred-obj string "updatedAt" date "2025-05-10T00:55:28Z" "$GITHUB_ACCOUNT")
@@ -161,12 +183,13 @@ envelope format "$GITHUB_ACCOUNT"
 
 │ "BRadvoc8" [
 │     'isA': "GitHubAccount"
-│     "commitKey": PublicKeys(2994f390, SigningPublicKey(a0eee379, SSHPublicKey(82fe613c)), EncapsulationPublicKey(901628e4, X25519PublicKey(901628e4)))
+│     "commitKey": PublicKeys(ec7a21f6, SigningPublicKey(7d5ef1bb, SSHPublicKey(e4c52c06)), EncapsulationPublicKey(52205534, X25519PublicKey(52205534)))
 │     "commitKeyProof": {
-│         "BRadvoc8 controls this SSH key on 2026-01-10" [
+│         "BRadvoc8 controls this SSH key on 2026-01-12" [
 │             'signed': Signature(SshEd25519)
 │         ]
 │     }
+│     "commitKeyText": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEtNMLHXgqLnxa+m+/NzXeSWrDZIpLLPrQ5Hr7e03squ"
 │     "createdAt": 2025-05-10T00:55:11Z
 │     "updatedAt": 2025-05-10T00:55:28Z
 │     'dereferenceVia': URI(https://api.github.com/users/BRadvoc8)
@@ -185,7 +208,7 @@ Notice:
 > - **Structured data** enables machine readability and automated verification
 > - **Known values** provide semantic clarity and interoperability encoded as simple integers
 
-Now add this envelope as an attachment to your XID:
+Finally, she adds this envelope as an attachment to her XIDDoc:
 
 ```
 XID_WITH_GITHUB_ATTACHMENT=$(
@@ -207,8 +230,15 @@ envelope format "$XID_WITH_GITHUB_ATTACHMENT"
 │         'attachment': {
 │             "BRadvoc8" [
 │                 'isA': "GitHubAccount"
-│                 "created_at": 2025-05-10T00:55:11Z
-│                 "updated_at": 2025-05-10T00:55:28Z
+│                 "commitKey": PublicKeys(ec7a21f6, SigningPublicKey(7d5ef1bb, SSHPublicKey(e4c52c06)), EncapsulationPublicKey(52205534, X25519PublicKey(52205534)))
+│                 "commitKeyProof": {
+│                     "BRadvoc8 controls this SSH key on 2026-01-12" [
+│                         'signed': Signature(SshEd25519)
+│                     ]
+│                 }
+│                 "commitKeyText": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEtNMLHXgqLnxa+m+/NzXeSWrDZIpLLPrQ5Hr7e03squ"
+│                 "createdAt": 2025-05-10T00:55:11Z
+│                 "updatedAt": 2025-05-10T00:55:28Z
 │                 'dereferenceVia': URI(https://api.github.com/users/BRadvoc8)
 │             ]
 │         } [
@@ -240,9 +270,9 @@ envelope format "$XID_WITH_GITHUB_ATTACHMENT"
 │ ]
 ```
 
-As you can see, the attachment has been added to the XIDDoc, it has been re-signed, and its private keys and provenance mark generator have been encrypted using the same password.
+As you can see, the attachment has been added to the XIDDoc, the entire XIDDoc has been re-signed (because changing it invalidated the previous signature), and its private keys and provenance mark generator have been encrypted using the same password.
 
-Let's break down each part of the command more closely:
+Let's break down each part of the command:
 
 |                                  |                                                                                                                                                            |
 |----------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -257,182 +287,52 @@ Let's break down each part of the command more closely:
 | `--encrypt-password "$PASSWORD"` | The password to use for encrypting the new XIDDoc's private keys and provenance generator.                                                                 |
 | `"$XID"`                         | The existing XIDDoc to which the attachment will be added.                                                                                                 |
 
-### Step 3: Add Your SSH Signing Key
-
-Now Amira adds an SSH signing key to her XID. This key is crucial for her **public participation profile** - it signs her Git commits on GitHub, proving her work is authentic.
-
-> **Why SSH Signing Keys Matter**: For pseudonymous contributors like Amira, signed Git commits ARE their reputation. Each commit signed with her SSH key proves it came from BRadvoc8, building verifiable evidence of technical capabilities over time.
-
-#### Step 3a: Generate SSH Signing Key
-
-Generate an SSH Ed25519 signing key for Git commits:
-
-```
-# Generate SSH Ed25519 signing key
-SSH_PRVKEYS=$(envelope generate prvkeys --signing ssh-ed25519)
-SSH_PUBKEYS=$(envelope generate pubkeys "$SSH_PRVKEYS")
-
-echo "✓ Generated SSH signing keypair"
-
-# Export SSH public key to standard format
-SSH_EXPORT=$(envelope export "$SSH_PUBKEYS")
-
-echo "Your SSH public key (standard format):"
-echo "$SSH_EXPORT"
-
-│ ✓ Generated SSH signing keypair
-│ Your SSH public key (standard format):
-│ ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMx...
-```
-
-This is the standard SSH public key format that GitHub recognizes. You can add this to your GitHub account's SSH signing keys.
-
-#### Step 3b: Prove SSH Key Control
-
-Now prove you control this key using a **proof-of-control** pattern:
-
-```
-# Create a proof-of-control statement with today's date
-CURRENT_DATE=$(date -u +"%Y-%m-%d")
-PROOF_STATEMENT=$(envelope subject type string "$XID_NAME controls this SSH key on $CURRENT_DATE")
-
-# Sign the statement with SSH private key
-PROOF=$(envelope sign --signer "$SSH_PRVKEYS" "$PROOF_STATEMENT")
-
-echo "Proof of SSH key control:"
-envelope format "$PROOF"
-
-│ Proof of SSH key control:
-│ "BRadvoc8 controls this SSH key on 2025-11-27" [
-│     'signed': Signature(SshEd25519)
-│ ]
-```
-
-The `Signature(SshEd25519)` proves this was signed with an SSH Ed25519 key.
-
-Anyone with the public key can verify:
-
-```
-# Verify the signature
-envelope verify --verifier "$SSH_PUBKEYS" "$PROOF"
-echo "✓ Signature verified - proof of key control confirmed"
-
-│ ✓ Signature verified - proof of key control confirmed
-```
-
-> **Why This Matters**: This challenge-response pattern proves Amira possesses the private key without revealing it. Anyone can verify the signature, confirming she controls the key that will sign her Git commits.
-
-#### Step 3c: Add SSH Key to XID
-
-Add the SSH public key and proof to the XID:
-
-```
-# Add SSH public key to XID
-UNWRAPPED_XID=$(envelope assertion add pred-obj string "sshSigningKey" string "$SSH_EXPORT" "$UNWRAPPED_XID")
-
-# Add the proof-of-control
-UNWRAPPED_XID=$(envelope assertion add pred-obj string "sshKeyProof" envelope "$PROOF" "$UNWRAPPED_XID")
-
-echo "✓ Added SSH signing key and proof to XID"
-envelope format "$UNWRAPPED_XID"
-```
+> **Note**: Attachments support `vendor` and `conformsTo` fields. `vendor` is always required, so the source of the attachment can be identified. `conformsTo` can be used to specify a schema or standard the attachment adheres to, enabling better interoperability and understanding of the data structure. Presumably Amira would use a standard schema for GitHub account information in a real implementation, but for this tutorial we are just building the structure without a formal schema.
 
 > **Key Separation**: You now have three keys in play:
-> - **XID signing key**: Proves this XID came from you (in `'key'` assertion)
-> - **XID encryption key**: Protects your data (also in `'key'` assertion)
-> - **SSH signing key**: Signs Git commits (new `"sshSigningKey"` assertion)
+> - **XID signing and encryption keys**: Proves this XID came from you (in `'key'` assertion), also allows decrypting messages sent to you (not covered in this tutorial)
+> - **SSH signing key**: Signs Git commits
 >
-> **Why separate?** Compromise containment. If your SSH key is compromised, your XID identity remains safe. Each key serves one specific purpose.
+> **Why separate?** Compromise containment. If your SSH private key is compromised, your XID identity remains safe. Each key serves one specific purpose.
 
----
+### Step 5: Elide Private Information
 
-## Part II: Sign and Create Public Version
-
-Now that you've built a rich persona, you need to re-sign your XID (since adding assertions changed it) and create a public version.
-
-### Step 4: Re-Sign Your Modified XID
-
-When you added assertions in Part I, you modified your XID's content. The original signature from Tutorial 01 no longer applies because it was over the original content. You need to re-sign.
+Now create a public version by eliding (leaving out) the private key and provenance mar generator. In your private version of the document, they are present but encrypted. In the public version, they are removed entirely, while the signature remains intact and valid.
 
 ```
-# Use the XID key command to extract and decrypt private keys
-PRVKEYS=$(envelope xid key all --private --password "$PASSWORD" "$XID")
+PUBLIC_XID_WITH_GITHUB_ATTACHMENT=$( \
+    envelope xid export \
+    --private elide \
+    --generator elide \
+    "$XID_WITH_GITHUB_ATTACHMENT" \
+)
+envelope format "$PUBLIC_XID_WITH_GITHUB_ATTACHMENT"
 
-# Also get the public keys for later verification
-KEY_ASSERTION=$(envelope assertion find predicate known key "$UNWRAPPED_XID")
-KEY_OBJECT=$(envelope extract object "$KEY_ASSERTION")
-
-# Wrap the modified XID (required for signing)
-WRAPPED_XID=$(envelope subject type wrapped "$UNWRAPPED_XID")
-
-# Sign with your XID's private keys
-SIGNED_XID=$(envelope sign --signer "$PRVKEYS" "$WRAPPED_XID")
-
-echo "Re-signed XID with new assertions:"
-envelope format "$SIGNED_XID"
-
-│ Re-signed XID with new assertions:
 │ {
-│     XID(c7e764b7) [
-│         "service": "GitHub" [...]
-│         "sshKeyProof": "BRadvoc8 controls this SSH key on 2025-11-28" [...]
-│         "sshSigningKey": "ssh-ed25519 AAAAC3Nza..."
-│         'key': PublicKeys(88d90933) [
-│             {
-│                 'privateKey': ENCRYPTED [
-│                     'hasSecret': EncryptedKey(Argon2id)
-│                 ]
-│             } [
-│                 'salt': Salt
+│     XID(6103b546) [
+│         'attachment': {
+│             "BRadvoc8" [
+│                 'isA': "GitHubAccount"
+│                 "commitKey": PublicKeys(ec7a21f6, SigningPublicKey(7d5ef1bb, SSHPublicKey(e4c52c06)), EncapsulationPublicKey(52205534, X25519PublicKey(52205534)))
+│                 "commitKeyProof": {
+│                     "BRadvoc8 controls this SSH key on 2026-01-12" [
+│                         'signed': Signature(SshEd25519)
+│                     ]
+│                 }
+│                 "commitKeyText": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEtNMLHXgqLnxa+m+/NzXeSWrDZIpLLPrQ5Hr7e03squ"
+│                 "createdAt": 2025-05-10T00:55:11Z
+│                 "updatedAt": 2025-05-10T00:55:28Z
+│                 'dereferenceVia': URI(https://api.github.com/users/BRadvoc8)
 │             ]
-│             'allow': 'All'
-│             'nickname': "BRadvoc8"
+│         } [
+│             'vendor': "self"
 │         ]
-│         'provenance': ProvenanceMark(632330b4) [...]
-│     ]
-│ } [
-│     'signed': Signature(Ed25519)
-│ ]
-```
-
-Notice the `{ }` wrapper and `'signed': Signature(Ed25519)` - your enriched XID is now properly signed!
-
-> **Why Re-Sign?** Adding assertions changes the envelope's content. The original signature was a cryptographic commitment to the *original* content. After modification, you need a new signature that commits to the *new* content. This is how XID updates work - each version is independently signed.
-
-### Step 5: Elide Private Keys
-
-Now create a public version by eliding (removing) the private key. This is where the Merkle tree magic from Tutorial 01 applies:
-
-```
-# Find the private key assertion digest
-PRIVATE_KEY_ASSERTION=$(envelope assertion find predicate known privateKey "$KEY_OBJECT")
-PRIVATE_KEY_DIGEST=$(envelope digest "$PRIVATE_KEY_ASSERTION")
-
-# Also find the provenance generator digest (it's encrypted but still private)
-PROV_ASSERTION=$(envelope assertion find predicate known provenance "$UNWRAPPED_XID")
-PROV_OBJECT=$(envelope extract object "$PROV_ASSERTION")
-PROV_GEN_ASSERTION=$(envelope assertion find predicate known provenanceGenerator "$PROV_OBJECT")
-PROV_GEN_DIGEST=$(envelope digest "$PROV_GEN_ASSERTION")
-
-# Create public version by eliding both from the SIGNED XID
-PUBLIC_XID=$(envelope elide removing "$PRIVATE_KEY_DIGEST" "$SIGNED_XID")
-PUBLIC_XID=$(envelope elide removing "$PROV_GEN_DIGEST" "$PUBLIC_XID")
-
-echo "Public XID (ready for sharing):"
-envelope format "$PUBLIC_XID"
-
-│ Public XID (ready for sharing):
-│ {
-│     XID(c7e764b7) [
-│         "service": "GitHub" [...]
-│         "sshKeyProof": "BRadvoc8 controls this SSH key on 2025-11-28" [...]
-│         "sshSigningKey": "ssh-ed25519 AAAAC3Nza..."
-│         'key': PublicKeys(88d90933) [
+│         'key': PublicKeys(2e94f423, SigningPublicKey(6103b546, Ed25519PublicKey(5d8b7d16)), EncapsulationPublicKey(33cee049, X25519PublicKey(33cee049))) [
 │             'allow': 'All'
 │             'nickname': "BRadvoc8"
 │             ELIDED
 │         ]
-│         'provenance': ProvenanceMark(632330b4) [
+│         'provenance': ProvenanceMark(80492376) [
 │             ELIDED
 │         ]
 │     ]
@@ -441,7 +341,7 @@ envelope format "$PUBLIC_XID"
 │ ]
 ```
 
-The `ELIDED` markers show private data has been removed, but the signature wrapper is still present!
+The `ELIDED` markers show private data has been removed, but the signature is still present and unchanged.
 
 ### Step 6: Verify Elision Preserved the Hash
 
@@ -449,24 +349,24 @@ Let's explicitly verify that elision preserved the root hash (just like in Tutor
 
 ```
 # Compare digests of signed XID vs public (elided) XID
-SIGNED_DIGEST=$(envelope digest "$SIGNED_XID")
-PUBLIC_DIGEST=$(envelope digest "$PUBLIC_XID")
+PRIVATE_DIGEST=$(envelope digest "$XID_WITH_GITHUB_ATTACHMENT")
+PUBLIC_DIGEST=$(envelope digest "$PUBLIC_XID_WITH_GITHUB_ATTACHMENT")
 
-echo "Signed XID digest: $SIGNED_DIGEST"
+echo "Signed XID digest: $PRIVATE_DIGEST"
 echo "Public XID digest: $PUBLIC_DIGEST"
 
-if [ "$SIGNED_DIGEST" = "$PUBLIC_DIGEST" ]; then
-    echo "✅ VERIFIED: Digests identical - elision preserved the root hash!"
+if [ "$PRIVATE_DIGEST" = "$PUBLIC_DIGEST" ]; then
+    echo '✅ VERIFIED: Digests identical - elision preserved the root hash!'
 else
-    echo "❌ ERROR: Digests differ"
+    echo '❌ ERROR: Digests differ'
 fi
 
 # Verify signature on the PUBLIC version (KEY_OBJECT was set in Step 4)
-PUBKEYS=$(envelope extract ur "$KEY_OBJECT")
-envelope verify -v "$PUBKEYS" "$PUBLIC_XID" >/dev/null && echo "✅ Signature verified on public XID!"
+PUBKEYS=$(envelope xid key at 0 "$PUBLIC_XID_WITH_GITHUB_ATTACHMENT")
+envelope verify --silent -v "$PUBKEYS" "$PUBLIC_XID_WITH_GITHUB_ATTACHMENT" && echo "✅ Signature verified on public XID!"
 
-│ Signed XID digest: ur:digest/hdcx...
-│ Public XID digest: ur:digest/hdcx...
+│ Signed XID digest: ur:digest/hdcxgsfphhmentmolkzcptislkvttsftgykbchrpendwrdfybyykkkesgyhnmwmyhlhnjldmmtdt
+│ Public XID digest: ur:digest/hdcxgsfphhmentmolkzcptislkvttsftgykbchrpendwrdfybyykkkesgyhnmwmyhlhnjldmmtdt
 │ ✅ VERIFIED: Digests identical - elision preserved the root hash!
 │ ✅ Signature verified on public XID!
 ```
