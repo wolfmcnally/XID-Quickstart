@@ -1,3 +1,4 @@
 - This example doesn't increment the provenance mark, but it really should to be complete, or at least mention that we're deferring that to a later tutorial.
 - Before I edited the tutorial, it claimed that the signed attestation of control of the SSH key prevented replay attacks, but that isn't really accurate. The attestation is just a proof of control at the time of signing, which isn't necessarily even the same as the time being signed. Without third-party timestamping or being part of a chain of provenance marks, the attestation doesn't prevent replay attacks.
 - I didn't edit past the Q&A.
+- I didn't update the tutorial script to reflect the changes.
