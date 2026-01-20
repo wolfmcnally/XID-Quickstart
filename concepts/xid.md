@@ -124,5 +124,5 @@ XIDs work together with:
 
 After understanding XID fundamentals, you can:
 
-- Apply these concepts in [Tutorial 1: Creating Your First XID](../tutorials/01-your-first-xid.md)
+- Apply these concepts in [Tutorial 1: Creating Your First XID](../tutorials/01-your-first-xid/tutorial-01.md)
 - Learn about [Gordian Envelope Basics](gordian-envelope-basics.md)

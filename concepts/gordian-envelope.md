@@ -244,7 +244,7 @@ comprehensive example of XID with additional metadata in an Envelope.
 ## Next Steps
 
 After understanding Gordian Envelope basics, you can:
-- Apply these concepts in [Tutorial 1: Creating Your First XID](../tutorials/01-your-first-xid.md) and [Tutorial 2: Understanding XID Structure](../tutorials/02-understanding-xid-structure.md)
+- Apply these concepts in [Tutorial 1: Creating Your First XID](../tutorials/01-your-first-xid/tutorial-01.md) and [Tutorial 2: Understanding XID Structure](../tutorials/02-understanding-xid-structure.md)
 - Learn about [Data Minimization Principles](data-minimization-principles.md)
 - Explore [Fair Witness Approach](fair-witness-approach.md)
 - Discover [Key Managment Essentials](key-management.md)

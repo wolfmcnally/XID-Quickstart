@@ -21,7 +21,7 @@ If self-sovereign identity and the desire to protect and empower users are impor
 ### Why To Use This Tutorial
 
 Working with XIDs in this tutorial will give you hands-on experience with how you can maintain a stable identifier even through key rotation, device additions, and recovery scenarios. It will also demonstrate how to cryptographically elide data while maintaining verifiability through signatures.
- 
+
 ## Learning Materials
 
 This repository contains conceptual documentation, hands-on tutorials, and examples used by those tutorials.
@@ -39,7 +39,7 @@ _No prior knowledge of XIDs or Gordian Envelope is required._
 2. Clone this repository: `git clone https://github.com/BlockchainCommons/XID-Quickstart.git`
 3. Optionally, review the core concepts from `concepts/README.md` until you're ready to get hands-on
 4. Navigate to the tutorials directory: `cd XID-Quickstart/tutorials`
-5. Start with the first tutorial: [Creating Your First XID](tutorials/01-your-first-xid.md)
+5. Start with the first tutorial: [Creating Your First XID](tutorials/01-your-first-xid/tutorial-01.md)
 
 ### Core Concepts
 
@@ -54,7 +54,7 @@ The guide includes a visual concept map and multiple learning paths.
 
 The tutorials provide practical experience with XIDs:
 
-1. [Creating Your First XID](tutorials/01-your-first-xid.md) - Create a pseudonymous identity
+1. [Creating Your First XID](tutorials/01-your-first-xid/tutorial-01.md) - Create a pseudonymous identity
 2. [Understanding XID Structure](tutorials/02-understanding-xid-structure.md) - Internal structure and components
 3. [Self-Attestation with XIDs](tutorials/03-self-attestation-with-xids.md) - Make verifiable claims about yourself
 4. [Peer Endorsement with XIDs](tutorials/04-peer-endorsement-with-xids.md) - Third-party verification methods

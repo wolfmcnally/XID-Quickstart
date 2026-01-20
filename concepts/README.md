@@ -32,7 +32,7 @@ Key topics covered:
 2. [Gordian Envelope](gordian-envelope.md) - The data structure that makes it work (15 min)
 3. [Data Minimization](data-minimization.md) - The privacy philosophy behind XIDs (10 min)
 
-**Ready to implement?** Jump to [Tutorial 1: Creating Your First XID](../tutorials/01-your-first-xid.md)
+**Ready to implement?** Jump to [Tutorial 1: Creating Your First XID](../tutorials/01-your-first-xid/tutorial-01.md)
 
 **Experienced developer?** Use the [Concept Map](#concept-map) to navigate directly to topics of interest.
 
@@ -150,7 +150,7 @@ flowchart TD
     K -.-> G
     G --> H["Pseudonymous Trust Building<br>Trust Without Legal Identity"]
     H --> I["Public Participation Profiles<br>Structured Identity Framework"]
-    
+
     click A "./xid.md" "XIDs: eXtensible IDentifiers"
     click B "./gordian-envelope.md" "Gordian Envelope: The data structure for XIDs"
     click C "./data-minimization.md" "Data Minimization: Controlling information disclosure"
@@ -167,7 +167,7 @@ flowchart TD
 
 Each tutorial builds on specific concepts. Here's how they align:
 
-- **Tutorial 1**: [Creating Your First XID](../tutorials/01-your-first-xid.md)
+- **Tutorial 1**: [Creating Your First XID](../tutorials/01-your-first-xid/tutorial-01.md)
   - **Primary concepts**: [XID](xid.md), [Gordian Envelope](gordian-envelope.md)
   - **What you'll learn**: Create and manage your first cryptographic identity
   - **Why it matters**: Foundation for all subsequent work with XIDs

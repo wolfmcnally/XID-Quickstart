@@ -6,7 +6,7 @@ Build your reputation foundation through self-attestations using fair witness me
 **Difficulty**: Intermediate
 **Builds on**: Tutorials 01-03
 
-> **Related Concepts**: After completing this tutorial, explore [Attestation & Endorsement Model](../concepts/attestation-endorsement-model.md) and [Pseudonymous Trust Building](../concepts/pseudonymous-trust-building.md) to deepen your understanding.
+> **Related Concepts**: After completing this tutorial, explore [Attestation & Endorsement Model](../../concepts/attestation-endorsement-model.md) and [Pseudonymous Trust Building](../../concepts/pseudonymous-trust-building.md) to deepen your understanding.
 
 ## Prerequisites
 
@@ -787,4 +787,4 @@ This script creates self-attestations, encrypts sensitive attestations, and buil
 
 ---
 
-**Next Tutorial**: [Peer Endorsements & Web of Trust](05-peer-endorsements.md) - Get others to validate your claims and build a web of trust.
+**Next Tutorial**: [Peer Endorsements & Web of Trust](../05-peer-endorsements/tutorial-05.md) - Get others to validate your claims and build a web of trust.

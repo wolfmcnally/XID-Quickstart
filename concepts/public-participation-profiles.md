@@ -621,7 +621,7 @@ XID_TRUST_SIGNED=$(envelope sign -s $PRIVATE_KEY $XID_TRUST_WRAPPED)
 ## Next Steps
 
 - See practical implementation examples in [Public Participation Profile Examples](public-participation-profile-examples.md) [currently out of date]
-- Apply these concepts in [Tutorial 1: Your First XID](../tutorials/01-your-first-xid.md)
+- Apply these concepts in [Tutorial 1: Your First XID](../tutorials/01-your-first-xid/tutorial-01.md)
 - Explore [Progressive Trust Life Cycle](progressive-trust-lifecycle.md) for a structured approach to disclosure
 - Learn about [Fair Witness Approach](fair-witness-approach.md) for making credible attestations
 - Try creating different profile views with [Tutorial 3: Self-Attestation with XIDs](../tutorials/03-self-attestation-with-xids.md)

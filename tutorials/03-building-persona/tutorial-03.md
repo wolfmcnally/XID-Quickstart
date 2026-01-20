@@ -4,7 +4,7 @@ This tutorial continues Amira's story as BRadvoc8. Now that she has a basic XID 
 
 **Time to complete: 20 minutes**
 
-> **Related Concepts**: Before or after completing this tutorial, you may want to read about [Progressive Trust](../concepts/progressive-trust.md) to understand how personas support trust-building over time.
+> **Related Concepts**: Before or after completing this tutorial, you may want to read about [Progressive Trust](../../concepts/progressive-trust.md) to understand how personas support trust-building over time.
 
 ## Prerequisites
 
@@ -77,9 +77,10 @@ Find and load your Tutorial 01 artifacts:
 
 ```
 # Find the most recent Tutorial 01 output directory
-TUTORIAL_01_DIR=$(find output/xid-2* -type d 2>/dev/null | sort -r | head -1)
+TUTORIAL_01_DIR=$(find ../01-your-first-xid/output/xid-2* -type d 2>/dev/null | sort -r | head -1)
 if [ -z "$TUTORIAL_01_DIR" ]; then
-    echo "No Tutorial 01 output found. Run tests/01-your-first-xid-TEST.sh first."
+    echo "No Tutorial 01 output found. Run Tutorial 01 first:"
+    echo "  cd ../01-your-first-xid && bash tutorial_output.sh"
     exit 1
 fi
 # Load the XID file
@@ -701,4 +702,4 @@ This script will create all the files shown in the tutorial with proper naming c
 
 ---
 
-**Next Tutorial**: [Publishing for Discovery](04-publishing-discovery.md) - Make your XID findable by declaring publication locations and establishing repository authority.
+**Next Tutorial**: [Publishing for Discovery](../04-publishing-discovery/tutorial-04.md) - Make your XID findable by declaring publication locations and establishing repository authority.

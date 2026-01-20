@@ -4,7 +4,7 @@ This tutorial introduces Gordian Clubs, a system for publishing verified content
 
 **Time to complete: 45-60 minutes**
 
-> **Related Concepts**: This tutorial builds on [Tutorial 01 (XIDs)](01-your-first-xid.md), [Tutorial 02 (Building Your Persona)](03-building-persona.md), [Tutorial 03 (Publishing for Discovery)](04-publishing-discovery.md), [Tutorial 04 (Self-Attestations)](06-self-attestations.md), and [Tutorial 05 (Peer Endorsements)](05-peer-endorsements.md). Familiarity with XIDs, permits, envelope encryption, and attestations is recommended.
+> **Related Concepts**: This tutorial builds on [Tutorial 01 (XIDs)](../01-your-first-xid/tutorial-01.md), [Tutorial 02 (Building Your Persona)](../03-building-persona/tutorial-03.md), [Tutorial 03 (Publishing for Discovery)](../04-publishing-discovery/tutorial-04.md), [Tutorial 04 (Self-Attestations)](../06-self-attestations/tutorial-06.md), and [Tutorial 05 (Peer Endorsements)](../05-peer-endorsements/tutorial-05.md). Familiarity with XIDs, permits, envelope encryption, and attestations is recommended.
 
 ## Prerequisites
 
@@ -793,6 +793,6 @@ This script will create all the files shown in the File Organization section wit
 
 ---
 
-**Previous Tutorial**: [Peer Endorsements](05-peer-endorsements.md) | [Key Management](06-key-management.md) (coming soon)
+**Previous Tutorial**: [Peer Endorsements](../05-peer-endorsements/tutorial-05.md) | [Key Management](../06-key-management.md) (coming soon)
 
 **Next**: This is the final tutorial in the series. Advanced topics include multi-publisher clubs and provenance integration.

@@ -102,7 +102,7 @@ This example shows how Amira can develop a more specialized profile for the wome
 - Security and privacy principles for safety applications
 - Implementation examples focused on the women's safety context
 - A peer endorsement from Charlene that validates her skills
-  
+
 This profile provides Ben with the specific trust signals needed for the safety application without compromising Amira's privacy.
 
 ### Example 3: Context-Specific Profile Views
@@ -204,7 +204,7 @@ These examples directly connect to the implementations in the tutorials:
 
 ### Connection to Tutorial 1: Your First XID
 
-In [Tutorial 1](../tutorials/01-your-first-xid.md), Amira creates her first XID as BWHacker, establishing her pseudonymous identity. The implementation follows a similar pattern to the initial profile example:
+In [Tutorial 1](../tutorials/01-your-first-xid/tutorial-01.md), Amira creates her first XID as BWHacker, establishing her pseudonymous identity. The implementation follows a similar pattern to the initial profile example:
 
 ```sh
 # In Tutorial 1, Amira creates her initial XID
@@ -402,7 +402,7 @@ The following tables provide a complete reference taxonomy of assertion types fo
 
 ## Next Steps
 
-- Create your own participation profile using [Tutorial 1: Your First XID](../tutorials/01-your-first-xid.md)
+- Create your own participation profile using [Tutorial 1: Your First XID](../tutorials/01-your-first-xid/tutorial-01.md)
 - Add self-attestations to your profile with [Tutorial 3: Self-Attestation with XIDs](../tutorials/03-self-attestation-with-xids.md)
 - Gather and integrate peer endorsements using [Tutorial 4: Peer Endorsement with XIDs](../tutorials/04-peer-endorsement-with-xids.md)
 - Learn about the [Progressive Trust Life Cycle](progressive-trust-lifecycle.md) that underlies participation profiles

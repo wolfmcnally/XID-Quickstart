@@ -6,7 +6,7 @@ Transform "I say I'm good" into "others agree I'm good" through peer endorsement
 **Difficulty**: Intermediate
 **Builds on**: Tutorials 01-04
 
-> **Related Concepts**: After completing this tutorial, explore [Public Participation Profiles](../concepts/public-participation-profiles.md) and [Web of Trust](../concepts/web-of-trust.md) to deepen your understanding.
+> **Related Concepts**: After completing this tutorial, explore [Public Participation Profiles](../../concepts/public-participation-profiles.md) and [Web of Trust](../../concepts/web-of-trust.md) to deepen your understanding.
 
 ## Prerequisites
 
@@ -797,4 +797,4 @@ This script creates endorsement requests, simulates peer endorsements from multi
 
 ---
 
-**Next Tutorial**: [Key Management](06-key-management.md) - Manage your identity lifecycle (coming soon). Or skip to [Gordian Clubs](07-gordian-clubs.md) for group communications.
+**Next Tutorial**: [Key Management](../06-key-management.md) - Manage your identity lifecycle (coming soon). Or skip to [Gordian Clubs](../07-gordian-clubs/tutorial-07.md) for group communications.

@@ -38,7 +38,7 @@ The [concepts guide](concepts/README.md) explains the theoretical foundations. R
 
 The tutorials provide practical, step-by-step instructions for working with XIDs:
 
-1. [Creating Your First XID](tutorials/01-your-first-xid.md) - Generate and verify a basic XID
+1. [Creating Your First XID](tutorials/01-your-first-xid/tutorial-01.md) - Generate and verify a basic XID
 2. [Understanding XID Structure](tutorials/02-understanding-xid-structure.md) - Examine XID components and add assertions
 3. [Self-Attestation with XIDs](tutorials/03-self-attestation-with-xids.md) - Make verifiable claims about yourself
 4. [Peer Endorsement with XIDs](tutorials/04-peer-endorsement-with-xids.md) - Create and accept third-party endorsements

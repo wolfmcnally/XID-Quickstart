@@ -17,20 +17,18 @@ To complete these tutorials, you'll need:
 
 The tutorials are designed to be completed in order:
 
-1. [Creating Your First XID](01-your-first-xid.md) - Learn to create a
-basic XID and understand its components
-2. [Understanding XID Structure](02-understanding-xid-structure.md) -
-Explore the inner workings of XIDs
-3. [Self-Attestation with XIDs](03-self-attestation-with-xids.md) -
-Create structured self-claims with verifiable evidence
-4. [Peer Endorsement with XIDs](04-peer-endorsement-with-xids.md) -
-Build a network of trust through independent verification
-5. [Key Management with XIDs](05-key-management-with-xids.md) - Learn
-to manage keys while maintaining identity
+1. [Your First XID](01-your-first-xid/tutorial-01.md) - Create a basic XID and understand its components
+2. *(Coming soon)*
+3. [Building Your Persona](03-building-persona/tutorial-03.md) - Enrich your XID with professional information and SSH signing keys
+4. [Publishing for Discovery](04-publishing-discovery/tutorial-04.md) - Add discovery locations and inception authority for publication
+5. [Peer Endorsements](05-peer-endorsements/tutorial-05.md) - Build a network of trust through independent verification
+6. [Self-Attestations](06-self-attestations/tutorial-06.md) - Create structured self-claims with verifiable evidence
+7. [Gordian Clubs](07-gordian-clubs/tutorial-07.md) - Work with group identities and collaborative structures
 
-Each tutorial builds on skills from previous sections. Complete
-working examples for each tutorial can be found in the `examples`
-directory.
+Each tutorial builds on skills from previous sections. Each tutorial directory contains:
+- `tutorial-NN.md` - The tutorial content
+- `tutorial_output-NN.sh` - A script that implements all tutorial steps
+- `output/` - Generated artifacts from running the script
 
 ## Key Concepts
 
@@ -43,16 +41,13 @@ XIDs (eXtensible IDentifiers) provide:
 
 ## Running the Examples
 
-For each tutorial, there is a corresponding example script in the
-`examples` directory. These scripts implement the full functionality
-covered in the tutorials.
+Each tutorial directory contains a `tutorial_output-NN.sh` script that implements all the steps from the tutorial.
 
 To run an example:
 
-👉 
 ```sh
-cd examples/01-basic-xid
-./create_basic_xid.sh
+cd tutorials/01-your-first-xid
+bash tutorial_output-01.sh
 ```
 
 ## Next Steps

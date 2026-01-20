@@ -4,7 +4,7 @@ This tutorial introduces Amira, a software developer with a politically sensitiv
 
 **Time to complete: 10-15 minutes**
 
-> **Related Concepts**: Before or after completing this tutorial, you may want to read about [XID Fundamentals](../concepts/xid.md) and [Gordian Envelope Basics](../concepts/gordian-envelope.md) to understand the theoretical foundations.
+> **Related Concepts**: Before or after completing this tutorial, you may want to read about [XID Fundamentals](../../concepts/xid.md) and [Gordian Envelope Basics](../../concepts/gordian-envelope.md) to understand the theoretical foundations.
 
 ## Prerequisites
 
@@ -268,7 +268,7 @@ Note that the identifier of the `SigningPublicKey` matches the XID identifier (`
 
 > **Important**: The same keypairs will always create the same XID structure (deterministic). The XID identifier is derived from the signing public key, so the same keypairs always produce the same XID identifier.
 
-> **Learn more**: [Key Derivation](concepts/key-derivation.md)
+> **Learn more**: [Key Derivation](../concepts/key-derivation.md)
 
 ### 🔍 What Just Happened: Understanding Keypairs in XIDs
 
@@ -650,7 +650,7 @@ The `'signed': Signature(Ed25519)` proves cryptographic authenticity. When we us
 
 **What about manual signing?** You'll learn the mechanics in Tutorial 02 when we cover building and publishing your identity - where understanding the signing process is more relevant.
 
-> **Learn more**: The [Signing and Verification](../concepts/signing.md) concept doc explains the cryptographic details.
+> **Learn more**: The [Signing and Verification](../../concepts/signing.md) concept doc explains the cryptographic details.
 
 ### One-Operation Workflow Summary
 
@@ -806,4 +806,4 @@ This script will create all the files shown in the File Organization section wit
 
 ---
 
-**Next Tutorial**: [Building & Publishing Your Identity](02-building-publishing.md) - Build your persona, add discovery mechanisms, and make BRadvoc8 findable while maintaining pseudonymity.
+**Next Tutorial**: [Building & Publishing Your Identity](../02-building-publishing.md) - Build your persona, add discovery mechanisms, and make BRadvoc8 findable while maintaining pseudonymity.
