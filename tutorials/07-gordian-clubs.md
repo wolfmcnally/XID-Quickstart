@@ -4,7 +4,7 @@ This tutorial introduces Gordian Clubs, a system for publishing verified content
 
 **Time to complete: 45-60 minutes**
 
-> **Related Concepts**: This tutorial builds on [Tutorial 01 (XIDs)](01-your-first-xid.md), [Tutorial 02 (Building Your Persona)](02-building-persona.md), [Tutorial 03 (Publishing for Discovery)](03-publishing-discovery.md), [Tutorial 04 (Self-Attestations)](04-self-attestations.md), and [Tutorial 05 (Peer Endorsements)](05-peer-endorsements.md). Familiarity with XIDs, permits, envelope encryption, and attestations is recommended.
+> **Related Concepts**: This tutorial builds on [Tutorial 01 (XIDs)](01-your-first-xid.md), [Tutorial 02 (Building Your Persona)](03-building-persona.md), [Tutorial 03 (Publishing for Discovery)](04-publishing-discovery.md), [Tutorial 04 (Self-Attestations)](06-self-attestations.md), and [Tutorial 05 (Peer Endorsements)](05-peer-endorsements.md). Familiarity with XIDs, permits, envelope encryption, and attestations is recommended.
 
 ## Prerequisites
 

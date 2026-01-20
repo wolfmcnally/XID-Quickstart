@@ -701,4 +701,4 @@ This script will create all the files shown in the tutorial with proper naming c
 
 ---
 
-**Next Tutorial**: [Publishing for Discovery](03-publishing-discovery.md) - Make your XID findable by declaring publication locations and establishing repository authority.
+**Next Tutorial**: [Publishing for Discovery](04-publishing-discovery.md) - Make your XID findable by declaring publication locations and establishing repository authority.
